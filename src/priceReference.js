@@ -4,7 +4,7 @@ export function localPriceReference(name,items=[]){
  if(!group)return {samples:[],suggested:null};
  const seen=new Set();
  const samples=items.filter(i=>{
-  if(seen.has(i.id)||!group.some(w=>i.name.includes(w))||i.price===null||!Number.isFinite(Number(i.price))||Number(i.price)<=0)return false;
+  if(i.sold||seen.has(i.id)||!group.some(w=>i.name.includes(w))||i.price===null||!Number.isFinite(Number(i.price))||Number(i.price)<=0)return false;
   seen.add(i.id);return true;
  }).map(i=>({id:i.id,name:i.name,price:Number(i.price),source:'本站示例挂牌价'}));
  const prices=samples.map(s=>s.price).sort((a,b)=>a-b);

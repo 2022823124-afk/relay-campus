@@ -5,6 +5,7 @@ import {analyzePhoto,aiAvailable} from './ai';
 import {readPhoto,brighten} from './Publish';
 import {categories,draftFromNote,extractOffer,validatePublish,followups,answerDescription} from './publishFlow';
 import {PriceReference} from './PriceReference.jsx';
+import {ServiceAccess} from './ServiceAccess';
 import './quick-publish.css';
 
 export function Publish({Modal,close,submit,school,items=[]}){
@@ -54,15 +55,17 @@ export function Publish({Modal,close,submit,school,items=[]}){
    </details>
    <div className="quick-help"><Sparkle size={22}/><div><b>{aiAvailable?'AI 整理，你来核对':'说过的，不用再填一遍'}</b><p>{aiAvailable?'生成名称、分类和描述，只提醒需要补充的地方。':'先把文字带入交易卡。图片 AI 尚未连接，不会上传照片。'}</p></div></div>
    {aiAvailable&&<p className="fine-print">点击“交给 AI 整理”会将本张主图和这句话发送到配置的识别服务。</p>}
+   {aiAvailable&&<ServiceAccess/>}
    <div className="modal-actions"><button className="btn purple" disabled={!d.image||busy} onClick={()=>prepare(aiAvailable)}>{busy?'正在整理…':aiAvailable?'交给 AI 整理':'整理成交易卡'}<ArrowRight size={17}/></button>{aiAvailable&&<button className="text-link" disabled={busy} onClick={()=>prepare(false)}>自己填写</button>}</div>
   </>:<>
    <div className="notice compact" role="status">{guidance}</div>
    <div className="quick-card"><img src={d.image} alt="待发布的物品"/><label className="field">物品名称<input maxLength={40} value={d.name} onChange={e=>set('name',e.target.value)}/></label></div>
    <label className="field">物品状况 · 可以直接修改<textarea rows={3} maxLength={1500} value={d.description} onChange={e=>set('description',e.target.value)} placeholder="简单说说功能、磨损和配件；不知道的可以写未知。"/></label>
    {questions.length>0&&<div className="quick-checks"><b>再补充这些就更清楚（可跳过）</b>{questions.filter(k=>followups[k]).map(k=><div key={k}><p>{followups[k].title}</p><div className="quick-questions">{followups[k].choices.map(a=><button key={a} className={`outline-button ${answers[k]===a?'selected':''}`} aria-pressed={answers[k]===a} onClick={()=>{setAnswers(v=>({...v,[k]:v[k]===a?'':a}));set('confirmed',false)}}>{a}</button>)}</div></div>)}</div>}
-   <div className="form-row"><label className="field">你的报价<input type="number" min="0" step="0.01" inputMode="decimal" value={d.price} onChange={e=>set('price',e.target.value)} placeholder="由你决定"/></label><label className="field">物品分类<select value={d.category} onChange={e=>set('category',e.target.value)}><option value="">请选择</option>{categories.map(s=><option key={s}>{s}</option>)}</select></label></div>
+   <div className="quote-comparison"><div><label className="field">你的报价<input type="number" min="0" step="0.01" inputMode="decimal" value={d.price} onChange={e=>set('price',e.target.value)} placeholder="由你决定"/></label>
    <button className="outline-button quick-free" aria-pressed={d.price==='0'} onClick={()=>set('price','0')}>这件免费送</button>
-   <PriceReference name={d.name} items={items} onAdopt={value=>set('price',value)}/>
+   <label className="field">物品分类<select value={d.category} onChange={e=>set('category',e.target.value)}><option value="">请选择</option>{categories.map(s=><option key={s}>{s}</option>)}</select></label></div>
+   <PriceReference name={d.name} items={items} currentPrice={d.price} onAdopt={value=>set('price',value)}/></div>
    <label className="field">在哪里交接？<select value={d.school} onChange={e=>{set('school',e.target.value);set('gate','')}}><option value="">选择学校</option>{schools.map(s=><option key={s}>{s}</option>)}</select></label>
    <div className="meeting-options quick-meeting" role="group" aria-label="选择规定交接点">{gates.map(g=><button aria-pressed={d.gate===g.id} className={d.gate===g.id?'selected':''} key={g.id} onClick={()=>set('gate',g.id)}><MapPin size={20}/><b>{g.name}</b>{d.gate===g.id&&<CheckCircle size={19}/>}</button>)}</div>
    <details className="history-disclosure"><summary>补充以前的交易记录（可选）{d.history==='upload'?' · 已添加凭证':''}</summary><label className="field">此前交易记录<select value={d.history} onChange={e=>set('history',e.target.value)}><option value="unknown">不知道／没有记录</option><option value="statement">有过交易，仅物主陈述</option><option value="upload">有凭证，可上传</option></select></label>{d.history==='upload'&&<><label className="upload-zone small-upload"><input disabled={busy} type="file" accept="image/*" aria-label="上传历史交易凭证" onChange={e=>upload(e,'proof')}/><UploadSimple size={24}/>{d.proof?'凭证已添加，点击更换':'添加历史凭证'}</label><label className="field">凭证来源<input maxLength={100} value={d.source} onChange={e=>set('source',e.target.value)} placeholder="例如：闲鱼订单截图"/></label><div className="form-row"><label className="field">历史价格（看不清可留空）<input type="number" min="0" step="0.01" value={d.previousPrice} onChange={e=>set('previousPrice',e.target.value)}/></label><label className="field">时间（可选）<input type="month" value={d.date} onChange={e=>set('date',e.target.value)}/></label></div></>}<p className="fine-print">上传记录单独标记，不计入平台交易次数。未知不代表从未交易。</p></details>

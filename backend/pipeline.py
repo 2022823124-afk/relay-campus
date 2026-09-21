@@ -8,13 +8,10 @@ import json
 import os
 import re
 from PIL import Image, UnidentifiedImageError
+from providers import NotConfigured, provider_name, deepseek_ask
 
 MAX_BYTES = 8 * 1024 * 1024
 Image.MAX_IMAGE_PIXELS = 16_000_000
-
-
-class NotConfigured(Exception):
-    pass
 
 
 def decode_image(value):
@@ -42,6 +39,10 @@ def decode_image(value):
 
 
 def configured():
+    if provider_name() == 'deepseek':
+        return bool(os.getenv('DEEPSEEK_API_KEY'))
+    if provider_name() != 'qwen':
+        return False
     return bool(os.getenv('DASHSCOPE_API_KEY') or os.getenv('RELAY_MODEL_SERVER'))
 
 
@@ -59,6 +60,10 @@ def model_config():
 
 
 def ask(system, content):
+    if provider_name() == 'deepseek':
+        return deepseek_ask(system, content)
+    if provider_name() != 'qwen':
+        raise NotConfigured('不支持此模型服务配置')
     config = model_config()
     from qwen_agent.agents import Assistant
     bot = Assistant(llm=config, system_message=system, function_list=[])

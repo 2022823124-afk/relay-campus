@@ -32,6 +32,7 @@ const close=()=>{setModal(null);setItem(null)},notify=setToast;
 const browse=(c='全部好物',v='market')=>{setCat(c);setView(v);setQuery('');setTimeout(()=>document.getElementById('market').scrollIntoView({behavior:'smooth'}),30)};
 const favorite=id=>setSaved(s=>s.includes(id)?s.filter(x=>x!==id):[...s,id]);
 const detail=i=>{setItem(i);setModal('detail')};
+useEffect(()=>{const id=new URLSearchParams(window.location.search).get('item');if(!id)return;const found=items.find(i=>i.id===id);if(found){setItem(found);setModal('detail')}else setToast('这条物品记录在当前市集中不存在。')},[]);
 const update=(id,patch)=>setDrafts(d=>d.map(x=>x.id===id?{...x,...patch}:x));
 const list=items.filter(i=>!i.sold&&(scope==='all'||(i.school||schools[0])===scope)&&(view!=='saved'||saved.includes(i.id))&&(cat==='全部好物'||cat==='免费接力'&&i.price===0||i.category===cat)&&`${i.name}${i.category}${i.owner}${i.id}`.toLowerCase().includes(query.toLowerCase())).sort((a,b)=>sort==='low'?a.price-b.price:sort==='high'?b.price-a.price:a.time-b.time);
 return <><div className="announcement"><span>旧物有故事，好物有下一站。</span><span>校园见面，让每一次接力都有迹可循 <ArrowUpRight size={13}/></span></div>

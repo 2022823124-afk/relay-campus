@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: relay-campus-agent
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements-deepseek.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.10
+      - key: RELAY_PROVIDER
+        value: deepseek
+      - key: DEEPSEEK_MODEL
+        value: deepseek-flash
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: RELAY_REQUIRE_ACCESS
+        value: "1"
+      - key: RELAY_ACCESS_CODE
+        sync: false
+      - key: RELAY_ALLOWED_ORIGINS
+        value: https://2022823124-afk.github.io

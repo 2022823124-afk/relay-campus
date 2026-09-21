@@ -1,16 +1,39 @@
 import os
 import threading
-from fastapi import FastAPI, HTTPException
+import secrets
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from pipeline import MAX_BYTES, NotConfigured, configured, decode_image, listing_draft, extract_receipt
 from pricing import price_reference
+from providers import provider_name
 
 app = FastAPI(title='Relay Campus Agent', docs_url='/docs')
 app.add_middleware(CORSMiddleware,
     allow_origins=os.getenv('RELAY_ALLOWED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173').split(','),
-    allow_methods=['POST', 'GET'], allow_headers=['Content-Type'])
+    allow_methods=['POST', 'GET'], allow_headers=['Content-Type', 'X-Relay-Access'])
 slot = threading.BoundedSemaphore(1)
+
+
+@app.middleware('http')
+async def protect_model_requests(request: Request, call_next):
+    if request.method == 'POST':
+        code = os.getenv('RELAY_ACCESS_CODE', '')
+        if os.getenv('RELAY_REQUIRE_ACCESS') == '1' and not code:
+            response = JSONResponse({'detail': '服务访问码尚未配置'}, status_code=503)
+        elif code and not secrets.compare_digest(request.headers.get('X-Relay-Access', '').encode(), code.encode()):
+            response = JSONResponse({'detail': '请填写正确的 AI 服务访问码'}, status_code=401)
+        else:
+            return await call_next(request)
+        # This middleware is outside CORS, so include allowed origin on errors.
+        origin = request.headers.get('origin')
+        allowed = os.getenv('RELAY_ALLOWED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173').split(',')
+        if origin in allowed:
+            response.headers['Access-Control-Allow-Origin'] = origin
+            response.headers['Vary'] = 'Origin'
+        return response
+    return await call_next(request)
 
 
 class ImageRequest(BaseModel):
@@ -20,7 +43,8 @@ class ImageRequest(BaseModel):
 
 @app.get('/health')
 def health():
-    return {'service': 'relay-agent', 'visionConfigured': configured(),
+    return {'service': 'relay-agent', 'provider': provider_name(), 'visionConfigured': configured(),
+            'requiresAccessCode': bool(os.getenv('RELAY_ACCESS_CODE')) or os.getenv('RELAY_REQUIRE_ACCESS') == '1',
             'ocrEnabled': os.getenv('RELAY_OCR_ENABLED') == '1',
             'note': '配置状态不代表模型连通性；发布仍需人工确认和审核'}
 
