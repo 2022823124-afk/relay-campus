@@ -1,6 +1,22 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {draftFromNote,validPrice,validatePublish,answerDescription} from '../src/publishFlow.js';
+import {draftFromNote,extractOffer,validPrice,validatePublish,answerDescription} from '../src/publishFlow.js';
+import {localPriceReference} from '../src/priceReference.js';
+
+test('natural owner offers include no spaces, fullwidth, Chinese and colloquial text',()=>{
+ for(const text of ['我想卖10元','我想卖１０元','我想卖十元','我想卖个10元','台灯，我打算卖10块钱','这件卖10元'])assert.equal(extractOffer(text),'10',text);
+ assert.equal(extractOffer('我想卖十二元'),'12');
+ assert.equal(extractOffer('我想卖两百元'),'200');
+ assert.equal(extractOffer('原价100元，我想卖10元'),'10');
+ for(const text of ['原价10元','我不想卖10元','以前卖10元','报价10到20元','想卖10万元'])assert.equal(extractOffer(text),'',text);
+});
+
+test('references only compare similar positive offers and deduplicate items',()=>{
+ const items=[{id:'a',name:'台灯',price:10},{id:'b',name:'暖光台灯',price:20},{id:'c',name:'旧台灯',price:30},{id:'a',name:'台灯',price:100},{id:'x',name:'相机',price:200},{id:'y',name:'台灯',price:0}];
+ const r=localPriceReference('台灯',items);assert.equal(r.samples.length,3);assert.equal(r.suggested,20);
+ assert.equal(localPriceReference('台灯',items.slice(0,2)).suggested,null);
+ assert.equal(localPriceReference('未知物品',items).samples.length,0);
+});
 
 test('owner words carry over, historical cost never becomes offer',()=>{
  const d=draftFromNote('台灯，买来 80 元，底座有划痕，想卖 30 元');

@@ -3,10 +3,11 @@ import {Camera,Check,CheckCircle,ArrowLeft,ArrowRight,Sparkle,MapPin,UploadSimpl
 import {schools,gates,meetingLabel,validMeeting} from './island';
 import {analyzePhoto,aiAvailable} from './ai';
 import {readPhoto,brighten} from './Publish';
-import {categories,draftFromNote,validatePublish,followups,answerDescription} from './publishFlow';
+import {categories,draftFromNote,extractOffer,validatePublish,followups,answerDescription} from './publishFlow';
+import {PriceReference} from './PriceReference.jsx';
 import './quick-publish.css';
 
-export function Publish({Modal,close,submit,school}){
+export function Publish({Modal,close,submit,school,items=[]}){
  const [step,setStep]=useState(1),[note,setNote]=useState('');
  const [d,setD]=useState({name:'',image:'',originalImage:'',description:'',category:'',condition:'见物品描述',price:'',school:schools.includes(school)?school:'',gate:'',history:'unknown',proof:'',previousPrice:'',date:'',source:'',sellerFaq:'',confirmed:false});
  const [extra,setExtra]=useState({}),[error,setError]=useState(''),[busy,setBusy]=useState(false),[adjusted,setAdjusted]=useState(false),[showOriginal,setShowOriginal]=useState(false),[guidance,setGuidance]=useState(''),[questions,setQuestions]=useState([]),[answers,setAnswers]=useState({});
@@ -45,6 +46,7 @@ export function Publish({Modal,close,submit,school}){
    <p className="modal-lead">不用想怎么填表。先给好物拍张照。</p>
    <label className={`upload-zone ${d.image?'has-photo':''}`}><input disabled={busy} type="file" accept="image/*" aria-label="上传物品照片" onChange={e=>upload(e,'image')}/>{d.image?<img src={showOriginal?d.originalImage:d.image} alt="物品照片"/>:<><Camera size={38}/><b>拍照或从相册选择</b><span>拍完整，保留真实使用痕迹</span></>}</label>
    <label className="field">随口说一句（可选）<textarea maxLength={1000} rows={2} disabled={busy} value={note} onChange={e=>setNote(e.target.value)} placeholder="例如：台灯，开关正常，底座有划痕，想卖 30 元。"/></label>
+   {extractOffer(note)!==''&&<p className="offer-detected" role="status">已识别你的报价 <b>¥{extractOffer(note)}</b> · 下一步自动填入，可修改</p>}
    <details className="history-disclosure"><summary>补拍细节或调整照片（可选）</summary>
     <p className="fine-print">侧面拍接口，近一点拍磨损。只上传给 AI 的主图会参与识别。</p>
     <div className="extra-photos">{[['side','补一张侧面'],['defect','补一张缺陷特写']].map(([k,label])=><label key={k}><input disabled={busy} type="file" accept="image/*" aria-label={label} onChange={e=>upload(e,k)}/>{extra[k]?<img src={extra[k]} alt={label}/>:<Camera size={23}/>}<span>{label}</span></label>)}</div>
@@ -60,6 +62,7 @@ export function Publish({Modal,close,submit,school}){
    {questions.length>0&&<div className="quick-checks"><b>再补充这些就更清楚（可跳过）</b>{questions.filter(k=>followups[k]).map(k=><div key={k}><p>{followups[k].title}</p><div className="quick-questions">{followups[k].choices.map(a=><button key={a} className={`outline-button ${answers[k]===a?'selected':''}`} aria-pressed={answers[k]===a} onClick={()=>{setAnswers(v=>({...v,[k]:v[k]===a?'':a}));set('confirmed',false)}}>{a}</button>)}</div></div>)}</div>}
    <div className="form-row"><label className="field">你的报价<input type="number" min="0" step="0.01" inputMode="decimal" value={d.price} onChange={e=>set('price',e.target.value)} placeholder="由你决定"/></label><label className="field">物品分类<select value={d.category} onChange={e=>set('category',e.target.value)}><option value="">请选择</option>{categories.map(s=><option key={s}>{s}</option>)}</select></label></div>
    <button className="outline-button quick-free" aria-pressed={d.price==='0'} onClick={()=>set('price','0')}>这件免费送</button>
+   <PriceReference name={d.name} items={items} onAdopt={value=>set('price',value)}/>
    <label className="field">在哪里交接？<select value={d.school} onChange={e=>{set('school',e.target.value);set('gate','')}}><option value="">选择学校</option>{schools.map(s=><option key={s}>{s}</option>)}</select></label>
    <div className="meeting-options quick-meeting" role="group" aria-label="选择规定交接点">{gates.map(g=><button aria-pressed={d.gate===g.id} className={d.gate===g.id?'selected':''} key={g.id} onClick={()=>set('gate',g.id)}><MapPin size={20}/><b>{g.name}</b>{d.gate===g.id&&<CheckCircle size={19}/>}</button>)}</div>
    <details className="history-disclosure"><summary>补充以前的交易记录（可选）{d.history==='upload'?' · 已添加凭证':''}</summary><label className="field">此前交易记录<select value={d.history} onChange={e=>set('history',e.target.value)}><option value="unknown">不知道／没有记录</option><option value="statement">有过交易，仅物主陈述</option><option value="upload">有凭证，可上传</option></select></label>{d.history==='upload'&&<><label className="upload-zone small-upload"><input disabled={busy} type="file" accept="image/*" aria-label="上传历史交易凭证" onChange={e=>upload(e,'proof')}/><UploadSimple size={24}/>{d.proof?'凭证已添加，点击更换':'添加历史凭证'}</label><label className="field">凭证来源<input maxLength={100} value={d.source} onChange={e=>set('source',e.target.value)} placeholder="例如：闲鱼订单截图"/></label><div className="form-row"><label className="field">历史价格（看不清可留空）<input type="number" min="0" step="0.01" value={d.previousPrice} onChange={e=>set('previousPrice',e.target.value)}/></label><label className="field">时间（可选）<input type="month" value={d.date} onChange={e=>set('date',e.target.value)}/></label></div></>}<p className="fine-print">上传记录单独标记，不计入平台交易次数。未知不代表从未交易。</p></details>

@@ -4,6 +4,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from pipeline import MAX_BYTES, NotConfigured, configured, decode_image, listing_draft, extract_receipt
+from pricing import price_reference
 
 app = FastAPI(title='Relay Campus Agent', docs_url='/docs')
 app.add_middleware(CORSMiddleware,
@@ -50,3 +51,21 @@ def draft(payload: ImageRequest):
 @app.post('/history-ocr')
 def history(payload: ImageRequest):
     return execute(payload, extract_receipt)
+
+
+class PriceRequest(BaseModel):
+    name: str = Field(min_length=2, max_length=80)
+
+
+@app.post('/price-reference')
+def price_lookup(payload: PriceRequest):
+    if not slot.acquire(blocking=False):
+        raise HTTPException(429, '服务正忙，请稍后再试')
+    try:
+        return price_reference(payload.name.strip())
+    except NotConfigured as exc:
+        raise HTTPException(503, str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(502, '暂时无法获取可靠的市场参考价') from exc
+    finally:
+        slot.release()

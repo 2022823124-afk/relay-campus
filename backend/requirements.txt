@@ -5,3 +5,4 @@ Pillow>=11,<13
 numpy>=1.26,<3
 soundfile>=0.13,<1
 python-dateutil>=2.9,<3
+requests>=2.32,<3
