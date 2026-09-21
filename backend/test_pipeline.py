@@ -29,16 +29,17 @@ class ContractTests(unittest.TestCase):
     def test_normalize_image(self):
         self.assertEqual(Image.open(io.BytesIO(decode_image(sample()))).format, 'JPEG')
 
-    def test_two_stages_and_untrusted_fields_cannot_publish(self):
+    def test_one_call_and_untrusted_fields_cannot_publish(self):
         calls = []
         def fake(system, content):
             calls.append(content)
-            if len(calls) == 1:
-                return dict(name='椅子', visible='黑色布面', questions='请确认承重')
             return dict(name='椅子', description='黑色布面，功能待确认', guidance='补拍支架',
+                        category='宿舍好物', questions=['function', 'function', 'invented'],
                         price=100, platformTransfers=5, source='Platform Record', stage='PUBLISHED')
-        result = listing_draft(decode_image(sample()), fake)
-        self.assertEqual(len(calls), 2)
+        result = listing_draft(decode_image(sample()), fake, note='底座有划痕')
+        self.assertEqual(len(calls), 1)
+        self.assertIn('底座有划痕', calls[0][0]['text'])
+        self.assertEqual(result['questions'], ['function'])
         self.assertEqual(result['source'], 'Image Suggestion')
         self.assertEqual(result['stage'], 'DRAFT')
         self.assertTrue(result['requiresConfirmation'])

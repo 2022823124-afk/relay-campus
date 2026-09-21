@@ -14,6 +14,7 @@ slot = threading.BoundedSemaphore(1)
 
 class ImageRequest(BaseModel):
     image: str = Field(max_length=MAX_BYTES * 4 // 3 + 100)
+    note: str = Field(default='', max_length=1000)
 
 
 @app.get('/health')
@@ -43,7 +44,7 @@ def execute(payload, operation):
 
 @app.post('/listing-draft')
 def draft(payload: ImageRequest):
-    return execute(payload, listing_draft)
+    return execute(payload, lambda raw: listing_draft(raw, note=payload.note))
 
 
 @app.post('/history-ocr')

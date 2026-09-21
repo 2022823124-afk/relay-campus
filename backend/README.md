@@ -7,7 +7,7 @@
 | 项目 | 在本项目的用途 | 边界 |
 | --- | --- | --- |
 | [ecommerce_multi_platform_agent](https://github.com/maizijian86/ecommerce_multi_platform_agent) | 借鉴理解→生成→校验的编排模式，本项目独立实现 | 不复制其模拟发布接口，也不接入淘宝、京东等平台 |
-| [Qwen-Agent](https://github.com/QwenLM/Qwen-Agent) | `Assistant.run()` 两阶段调用：图片观察→中文信息草稿 | 必须提供可用的视觉模型服务；不开放代码执行或自动发布工具 |
+| [Qwen-Agent](https://github.com/QwenLM/Qwen-Agent) | `Assistant.run()` 单次多模态调用：图片＋物主原话→待确认草稿 | 必须提供可用的视觉模型服务；不开放代码执行或自动发布工具 |
 | [AgentLego](https://github.com/InternLM/agentlego) | 可选 `load_tool('OCR')` 读取中英文凭证 | 需要 EasyOCR、PyTorch 和 OCR 权重；不是商品真伪鉴定 |
 
 图片与模型输出均视为不可信资料。确定性校验限制字段、类型和长度，无法证明描述语义完全正确，因此仍需物主逐项确认。API 不写入商品、不执行发布。
@@ -26,7 +26,7 @@
 ## 接口与来源
 
 - `GET /health`：返回配置状态，不冒充实际模型连通性检查。
-- `POST /listing-draft`：`{"image":"data:image/jpeg;base64,..."}` → `name / description / guidance / source: Image Suggestion / requiresConfirmation: true`。只接受图片数据，不抓取外部网址。价格和交易次数不会从模型输出进入结果。
+- `POST /listing-draft`：`{"image":"data:image/jpeg;base64,..."}` 可带 `note`（物主原话） → `name / description / category / questions / guidance / source: Image Suggestion / requiresConfirmation: true`。只接受图片数据，不抓取外部网址。价格和交易次数不会从模型输出进入结果。
 - `POST /history-ocr`：同样输入 → OCR 文本、候选来源 `Uploaded Record`、待确认标记。**不自动生成交易条目**，也不证明截图确属同一物品或已成交；物主确认前不成为 Uploaded Record。
 - 两个接口都不保留图片；OCR 临时文件完成后删除。图片理解会将去除元数据后的图片发送至配置的模型服务，须遵循前端授权。
 - 无平台记录不等于没有历史；Uploaded Record 永远不升级为 Platform Record。
@@ -37,6 +37,6 @@
 
 ## 验证
 
-安装 `requirements-test.txt` 后，`python -m unittest -v test_pipeline.py` 检查输入、两阶段编排、字段隔离、待确认状态和无服务降级。测试中的模型替身只验证契约，不代表完成真实视觉识别评测。真实模型需要用用户照片验证可见状况、拒绝猜测和错误处理。
+安装 `requirements-test.txt` 后，`python -m unittest -v test_pipeline.py` 检查输入、单次编排、字段隔离、待确认状态和无服务降级。测试中的模型替身只验证契约，不代表完成真实视觉识别评测。真实模型需要用用户照片验证可见状况、拒绝猜测和错误处理。
 
 2026-09-21 本机验证：Qwen-Agent 0.0.34 的 Assistant 已成功初始化；AgentLego 0.2.0 的 OCR 已确认在工具注册表中。未配置模型服务，未下载 OCR 权重，因此尚未执行真实图片识别或 OCR。补充声明 NumPy、SoundFile 和 python-dateutil，以修复 Qwen-Agent 在干净环境中的导入依赖缺失。
