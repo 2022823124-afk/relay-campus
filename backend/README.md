@@ -36,7 +36,7 @@
 
 ## Supabase
 
-按 [`docs/supabase-setup.md`](../docs/supabase-setup.md) 创建表与私有图片桶，再把 `SUPABASE_URL` 和 `SUPABASE_SERVICE_ROLE_KEY` 只配置到 Render。前端不需要、也不应出现 Supabase service role key。
+按 [`docs/supabase-setup.md`](../docs/supabase-setup.md) 创建表与私有图片桶，再把 `SUPABASE_URL` 和 `SUPABASE_SECRET_KEY` 只配置到 Render。前端不需要、也不应出现 Supabase secret key。旧项目的 `SUPABASE_SERVICE_ROLE_KEY` 仍兼容。
 
 ## 部署边界
 

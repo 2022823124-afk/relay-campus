@@ -25,10 +25,10 @@
 | 变量 | 从哪里复制 |
 | --- | --- |
 | `SUPABASE_URL` | Supabase → Project Settings → API → Project URL |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project Settings → API → service_role secret |
+| `SUPABASE_SECRET_KEY` | Supabase → Project Settings → API Keys → Secret key（`sb_secret_...`） |
 | `SUPABASE_STORAGE_BUCKET` | 填 `item-images` |
 
-`SUPABASE_SERVICE_ROLE_KEY` 不要发到聊天、不要放进 GitHub，也不要写成任何 `VITE_` 变量。保存后让 Render 重新部署。
+`SUPABASE_SECRET_KEY` 不要发到聊天、不要放进 GitHub，也不要写成任何 `VITE_` 变量。保存后让 Render 重新部署。旧项目只有 JWT 格式的 `service_role` 时，也可临时放进 `SUPABASE_SERVICE_ROLE_KEY`，但新项目优先使用 Secret key。
 
 ## 3. 检查是否接通
 

@@ -19,7 +19,8 @@ class DatabaseNotConfigured(RuntimeError):
 
 
 def configured():
-    return bool(os.getenv('SUPABASE_URL') and os.getenv('SUPABASE_SERVICE_ROLE_KEY'))
+    return bool(os.getenv('SUPABASE_URL') and
+                (os.getenv('SUPABASE_SECRET_KEY') or os.getenv('SUPABASE_SERVICE_ROLE_KEY')))
 
 
 def _settings():
@@ -28,13 +29,18 @@ def _settings():
     base = os.environ['SUPABASE_URL'].rstrip('/')
     if not base.startswith(('https://', 'http://127.0.0.1:', 'http://localhost:')):
         raise ValueError('SUPABASE_URL 必须使用 HTTPS')
-    key = os.environ['SUPABASE_SERVICE_ROLE_KEY']
+    key = os.getenv('SUPABASE_SECRET_KEY') or os.environ['SUPABASE_SERVICE_ROLE_KEY']
     return base, key, os.getenv('SUPABASE_STORAGE_BUCKET', 'item-images')
 
 
 def _headers(extra=None):
     _, key, _ = _settings()
-    return {'apikey': key, 'Authorization': f'Bearer {key}', **(extra or {})}
+    headers = {'apikey': key, **(extra or {})}
+    # New sb_secret keys are not JWTs and must use only the apikey header.
+    # Keep Authorization only for the legacy JWT-based service_role key.
+    if not key.startswith('sb_secret_'):
+        headers['Authorization'] = f'Bearer {key}'
+    return headers
 
 
 def _rest(method, table, *, params=None, json=None, prefer=None):
