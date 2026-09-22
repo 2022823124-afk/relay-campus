@@ -22,3 +22,9 @@ services:
         sync: false
       - key: RELAY_ALLOWED_ORIGINS
         value: https://2022823124-afk.github.io
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_STORAGE_BUCKET
+        value: item-images

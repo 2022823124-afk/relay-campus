@@ -27,7 +27,7 @@ npm run dev -- --host 0.0.0.0 --port 4173 --strictPort
 
 这是前端原型，不是已上线交易平台。商品、人物和交易记录为示例数据。未接入登录认证、后台权限、真实聊天、自动 OCR、支付或真实审核服务。工作人员按钮和双方成交勾选用于演示不同角色。
 
-数据保存在当前浏览器 localStorage，不在不同浏览器间同步。上传图片会在本地缩小并压缩，不发送到服务器。清除该站点数据即可恢复示例市集。请勿用此原型存储唯一一份重要交易凭证。
+未配置 Supabase 时，数据仍保存在当前浏览器 localStorage，不在不同浏览器间同步。配置完成后，物主确认提交的交易卡与照片会经 Render 后端写入 PostgreSQL 和私有 Storage，本地仍保留一份用于当前演示界面。请勿用此原型存储唯一一份重要交易凭证。
 
 ## 文件
 
@@ -61,3 +61,7 @@ npm run dev -- --host 0.0.0.0 --port 4173 --strictPort
 配置 `VITE_AI_ENDPOINT` 后，用户勾选同意才会向该可信后端 `POST /listing-draft`，JSON 请求为 `{image: "data:image/jpeg;base64,..."}`，返回 `{name: string, description: string, guidance?: string}`。未配置时禁用识别，用户可继续手填；超时或错误不会阻止手动发布。服务端需另行实现鉴权、限流、隐私与来源核验，不要把模型密钥放入前端。GitHub Pages 本身不提供此后端。
 
 AI 内容为候选草稿，不能推断转手次数、隐藏缺陷或自动发布；物主确认后仍进入演示审核。
+
+### Supabase 数据库与图片存储
+
+运行 [`supabase/migrations/001_relay_storage.sql`](supabase/migrations/001_relay_storage.sql) 并按 [`docs/supabase-setup.md`](docs/supabase-setup.md) 配置 Render 后，发布照片写入私有 Storage，交易卡写入 PostgreSQL。只有双方确认的本站成交记录会进入价格参考样本；用户上传凭证与公开网页挂牌价保持独立来源。
