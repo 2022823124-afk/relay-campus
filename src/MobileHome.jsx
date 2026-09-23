@@ -3,7 +3,7 @@ import {ArrowLeft,Recycle,MapPin,CaretDown,MagnifyingGlass,IdentificationCard,X,
 
 const categories=[['全部好物','全部',SquaresFour],['数码装备','数码',Camera],['书籍文具','书籍画材',BookOpen],['宿舍好物','宿舍',Armchair],['绿植生活','绿植',Plant]];
 export function MobileHeader({view,free,scope,onCampus,onLookup,onBack}){
- return <header className="app-mobile-header"><button className="mobile-back" aria-label="返回上一页" onClick={onBack}><ArrowLeft size={22}/></button><div className="mobile-wordmark"><b>{view==='mine'?'我的接力':view==='messages'?'消息':view==='saved'?'我的收藏':free?'免费接力':'接力卡'}</b></div><button className="mobile-school" onClick={onCampus}><MapPin size={14}/><span>{scope==='all'?'小谷围 · 全岛':scope}</span><CaretDown size={12}/></button><button className="mobile-tool" aria-label="查询物品身份" onClick={onLookup}><IdentificationCard size={23}/></button></header>
+ return <header className="app-mobile-header">{view==='saved'&&(<button className="mobile-back" aria-label="返回上一页" onClick={onBack}><ArrowLeft size={22}/></button>)}<div className="mobile-wordmark"><b>{view==='mine'?'我的接力':view==='messages'?'消息':view==='saved'?'我的收藏':free?'免费接力':'接力卡'}</b></div><button className="mobile-school" onClick={onCampus}><MapPin size={14}/><span>{scope==='all'?'小谷围 · 全岛':scope}</span><CaretDown size={12}/></button><button className="mobile-tool" aria-label="查询物品身份" onClick={onLookup}><IdentificationCard size={23}/></button></header>
 }
 export function MobileDiscover({free,view,query,setQuery,cat,setCat,sort,setSort,onBrowse,onPublish,onAssistant}){
  return <section className="mobile-discover" aria-label="手机发现页">
