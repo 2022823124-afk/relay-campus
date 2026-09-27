@@ -1,6 +1,8 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {localPriceReference} from './priceReference';
-import {aiAvailable,aiHeaders} from './ai';
+import {aiHeaders} from './ai';
+
+const priceEndpoint=(import.meta.env.VITE_PRICE_ENDPOINT||import.meta.env.VITE_AI_ENDPOINT||'').replace(/\/$/,'');
 
 export function PriceReference({name,category,items,onAdopt,currentPrice}){
  const local=localPriceReference(name,items),[result,setResult]=useState(null),[busy,setBusy]=useState(false),[error,setError]=useState('');
@@ -8,7 +10,7 @@ export function PriceReference({name,category,items,onAdopt,currentPrice}){
  useEffect(()=>{generation.current++;controller.current?.abort();setResult(null);setError('');setBusy(false);return()=>{generation.current++;controller.current?.abort()}},[name,category]);
  const search=async()=>{
   const version=generation.current;setBusy(true);setError('');setResult(null);const request=new AbortController();controller.current=request;const timer=setTimeout(()=>request.abort(),60000);
-  try{const response=await fetch(`${import.meta.env.VITE_AI_ENDPOINT.replace(/\/$/,'')}/price-reference`,{method:'POST',headers:aiHeaders(),body:JSON.stringify({name,category}),signal:request.signal});
+  try{const response=await fetch(`${priceEndpoint}/price-reference`,{method:'POST',headers:aiHeaders(),body:JSON.stringify({name,category}),signal:request.signal});
    if(response.status===401)throw new Error('服务暂未开放，请联系网站维护者。');
    if(!response.ok){const failure=await response.json().catch(()=>({}));throw new Error(response.status===503&&typeof failure.detail==='string'?failure.detail:response.status===429?'查询较多，请稍后再试。':'价格检索暂时失败，请稍后重试。');}
    const value=await response.json();if(!Array.isArray(value.samples))throw new Error('价格数据格式不完整。');
@@ -24,7 +26,7 @@ export function PriceReference({name,category,items,onAdopt,currentPrice}){
   {Number.isFinite(suggested)&&suggested>0?<div className="price-adopt"><span>{result?.source==='Platform Transaction'?'平台成交中位数':'报价中位数参考'} <b>¥{suggested}</b><small>基于 {samples.length} 条样本，非估值；请结合成色判断</small></span><button className="outline-button" onClick={()=>onAdopt(String(suggested))}>采用 ¥{suggested}</button></div>:samples.length>0&&<p className="fine-print">不同成色和规格的报价不合并估价，请逐条核对。</p>}
   {result&&samples.length===0&&!result.retailSamples?.length&&result.sourceLinks?.length>0&&<div className="price-source-links"><b>检索到的相关页面</b><p className="fine-print">以下尚未提取到可靠价格，可打开原页面核对，不计入参考价。</p><ul>{result.sourceLinks.filter(s=>/^https?:\/\//.test(s.url)).map(s=><li key={s.url}><a href={s.url} target="_blank" rel="noreferrer">{s.title||'查看来源'} ↗</a></li>)}</ul></div>}
   {result?.checkedAt&&<p className="fine-print">查询时间：{new Date(result.checkedAt).toLocaleString('zh-CN')}</p>}
-  {aiAvailable?<><button className="outline-button" disabled={busy||!name.trim()} onClick={search}>{busy?'正在查找价格来源…':'联网查参考价'}</button><p className="fine-print">支持常见商品查询，名称越具体越容易找到：如“罗技 M185 鼠标”“同济 高等数学 第七版 上册”。仅发送名称和分类，不上传照片，也不会覆盖你的报价。</p></>:<p className="fine-print">联网市场比价尚未连接。接入价格检索服务后可在这里查询有来源的参考价。</p>}
+  {priceEndpoint?<><button className="outline-button" disabled={busy||!name.trim()} onClick={search}>{busy?'正在查找价格来源…':'联网查参考价'}</button><p className="fine-print">支持常见商品查询，名称越具体越容易找到：如“罗技 M185 鼠标”“同济 高等数学 第七版 上册”。仅发送名称和分类，不上传照片，也不会覆盖你的报价。</p></>:<p className="fine-print">联网市场比价尚未连接。接入价格检索服务后可在这里查询有来源的参考价。</p>}
   {error&&<p className="error" role="status">{error}</p>}
   
  </aside>;
