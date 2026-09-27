@@ -1,0 +1,6 @@
+@media(min-width:601px){
+ body:has(.phone-demo-stage){background:#e9e6ed;overflow:hidden}
+ .phone-demo-stage{height:100dvh;min-height:0;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at top,#f6f2f8,#e9e6ed);box-sizing:border-box}
+ .phone-demo-device{width:390px;height:min(844px,calc(100dvh - 40px));flex:none;border:1px solid #d7cfdd;border-radius:26px;overflow:hidden;background:#f6f7f1;box-shadow:0 18px 60px #392b5026}
+ .phone-demo-screen{display:block;width:100%;height:100%;border:0;background:#f6f7f1}
+}

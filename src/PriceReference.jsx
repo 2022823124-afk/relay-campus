@@ -1,7 +1,6 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {localPriceReference} from './priceReference';
 import {aiAvailable,aiHeaders} from './ai';
-import {ServiceAccess} from './ServiceAccess';
 
 export function PriceReference({name,category,items,onAdopt,currentPrice}){
  const local=localPriceReference(name,items),[result,setResult]=useState(null),[busy,setBusy]=useState(false),[error,setError]=useState('');
@@ -10,7 +9,7 @@ export function PriceReference({name,category,items,onAdopt,currentPrice}){
  const search=async()=>{
   const version=generation.current;setBusy(true);setError('');setResult(null);const request=new AbortController();controller.current=request;const timer=setTimeout(()=>request.abort(),60000);
   try{const response=await fetch(`${import.meta.env.VITE_AI_ENDPOINT.replace(/\/$/,'')}/price-reference`,{method:'POST',headers:aiHeaders(),body:JSON.stringify({name,category}),signal:request.signal});
-   if(response.status===401)throw new Error('请填写正确的 AI 服务访问码后重试。');
+   if(response.status===401)throw new Error('服务暂未开放，请联系网站维护者。');
    if(!response.ok)throw new Error(response.status===503?'联网比价服务尚未配置，暂时不能获取市场价。':'暂时查不到可靠的参考价，请稍后重试。');
    const value=await response.json();if(!Array.isArray(value.samples))throw new Error('价格数据格式不完整。');
    if(version===generation.current)setResult(value);
@@ -25,6 +24,6 @@ export function PriceReference({name,category,items,onAdopt,currentPrice}){
   {result?.checkedAt&&<p className="fine-print">查询时间：{new Date(result.checkedAt).toLocaleString('zh-CN')}</p>}
   {aiAvailable?<><button className="outline-button" disabled={busy||!name.trim()} onClick={search}>{busy?'正在查找价格来源…':'联网查参考价'}</button><p className="fine-print">仅发送物品名称和分类查询，不上传照片和历史凭证。不会覆盖你的报价。</p></>:<p className="fine-print">联网市场比价尚未连接。接入价格检索服务后可在这里查询有来源的参考价。</p>}
   {error&&<p className="error" role="status">{error}</p>}
-  {aiAvailable&&error&&<ServiceAccess/>}
+  
  </aside>;
 }

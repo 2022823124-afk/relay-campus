@@ -1,7 +1,6 @@
 import React,{useState,useEffect,useRef} from 'react';
 import {Sparkle} from '@phosphor-icons/react';
 import {generateWriting,aiAvailable} from './ai';
-import {ServiceAccess} from './ServiceAccess';
 import './writing-assistant.css';
 
 export function WritingAssistant({mode,name,description,onApply,focusContext=''}){
@@ -20,7 +19,7 @@ export function WritingAssistant({mode,name,description,onApply,focusContext=''}
  return <details className="writing-assistant"><summary><Sparkle size={19}/>{seller?'补充一句，让 AI 帮你说清楚':'补充用途，让 AI 细化问题'}</summary>
  <p>{seller?'补充功能、磨损或配件，AI 整理成待确认文案。':'已结合上方关注点。可补充用途，再生成更具体的问题和询问消息。'}</p>
  <label className="field">{seller?'补充真实情况':'你的用途或在意的地方（可选）'}<textarea maxLength={seller?1000:500} rows={2} value={note} disabled={busy} onChange={e=>{setNote(e.target.value);setResult(null)}} placeholder={seller?'例如：灯能正常亮，底座有划痕，带电源线。':'例如：想在宿舍看书用，担心灯光太暗。'}/></label>
- <p className="fine-print">点击生成会发送物品名称、描述、关注点和补充文字。AI 建议需核对，不代表平台验证。</p>{aiAvailable?<ServiceAccess/>:<p className="fine-print">AI 服务尚未连接。{seller?'你可以继续手动填写。':'上方的问题和询问消息仍可直接使用。'}</p>}
+ <p className="fine-print">点击生成会发送物品名称、描述、关注点和补充文字。AI 建议需核对，不代表平台验证。</p>{!aiAvailable&&<p className="fine-print">AI 服务尚未连接。{seller?'你可以继续手动填写。':'上方的问题和询问消息仍可直接使用。'}</p>}
  <button type="button" className="outline-button" disabled={!aiAvailable||busy||!name.trim()||!description.trim()} onClick={generate}>{busy?'正在生成…':seller?'生成新版描述':'生成问题与询问消息'}</button>
  {error&&<p className="error" role="alert">{error}</p>}
  {result&&<div className="writing-result" aria-live="polite">{result.questions.length>0&&<><b>{seller?'这些还需要你确认':'建议向物主确认'}</b><ul>{result.questions.map(q=><li key={q}>{q}</li>)}</ul></>}

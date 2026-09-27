@@ -6,7 +6,6 @@ import {analyzePhoto,aiAvailable} from './ai';
 import {readPhoto,brighten} from './Publish';
 import {categories,draftFromNote,extractOffer,validatePublish,followups,answerDescription} from './publishFlow';
 import {PriceReference} from './PriceReference.jsx';
-import {ServiceAccess} from './ServiceAccess';
 import './quick-publish.css';
 
 export function Publish({Modal,close,submit,school,items=[],initialMode='sale'}){
@@ -61,7 +60,7 @@ export function Publish({Modal,close,submit,school,items=[],initialMode='sale'})
    </details>
    <div className="quick-help"><Sparkle size={22}/><div><b>{aiAvailable?'AI 整理，你来核对':'说过的，不用再填一遍'}</b><p>{aiAvailable?'生成名称、分类和描述，只提醒需要补充的地方。':'先把文字带入交易卡。图片 AI 尚未连接，不会上传照片。'}</p></div></div>
    {aiAvailable&&<p className="fine-print">点击“交给 AI 整理”会将本张主图和这句话发送到配置的识别服务。</p>}
-   {aiAvailable&&<ServiceAccess/>}
+   
    <div className="modal-actions"><button className="btn purple" disabled={!d.image||busy} onClick={()=>prepare(aiAvailable)}>{busy?'正在整理…':aiAvailable?'交给 AI 整理':'整理成交易卡'}<ArrowRight size={17}/></button>{aiAvailable&&<button className="text-link" disabled={busy} onClick={()=>prepare(false)}>自己填写</button>}</div>
   </>:<>
    <div className="notice compact" role="status">{guidance}</div>
