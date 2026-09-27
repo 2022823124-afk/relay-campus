@@ -38,3 +38,16 @@
  .detail-grid .item-identity{background:transparent;padding:8px 0;margin:0;font-size:12px;color:#797080}
  .detail-grid .item-identity small{display:none}.detail-grid .item-identity svg{width:16px;height:16px}
 }
+/* Focus selection changes the reading aid, never the underlying disclosure. */
+.focus-intro{font-size:13px;line-height:1.6;color:#62576d;margin:12px 0}
+.focus-reading h3{font-size:14px;line-height:1.5;margin:16px 0 8px;color:#40364b}
+.focus-facts,.focus-questions{margin:0;padding:0;list-style:none}
+.focus-facts{display:grid;gap:8px}.focus-facts li{padding:10px 12px;background:#fff;border-radius:8px;min-width:0}
+.focus-facts small{font-size:12px;color:#706676}.focus-facts p{font-size:14px;line-height:1.7;margin:3px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.focus-source,.focus-empty{font-size:12px;line-height:1.65;color:#675d70;margin:8px 0}
+.focus-missing{font-size:13px;line-height:1.7;padding:10px 12px;border-left:3px solid #aa8649;background:#fff9ee;color:#655134;border-radius:4px}.focus-missing b{display:block;margin-bottom:2px}
+.focus-questions{padding-left:20px;list-style:disc;font-size:14px;line-height:1.7;color:#483a55}.focus-questions li+li{margin-top:6px}
+.focus-message{margin-top:12px}.focus-message summary{min-height:44px;padding:10px 0;cursor:pointer;font-size:14px;font-weight:600;color:#694096}.focus-message .btn{white-space:normal;min-height:44px}.focus-message>small{display:block;font-size:12px;line-height:1.6;margin:8px 0;color:#675d70}
+.product-focus .writing-assistant{background:transparent;margin:16px 0 12px;padding:12px 0;border:0;border-top:1px solid #d9cfe3;border-radius:0}
+.focus-choices button:focus-visible,.focus-message summary:focus-visible{outline:3px solid #7950ac;outline-offset:3px}
+.focus-choices button{min-height:44px}
