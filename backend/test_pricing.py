@@ -95,3 +95,10 @@ class EvidenceUrlTests(unittest.TestCase):
     def test_markdown_normalization_preserves_url_underscores(self):
         from pricing import plain_price_text
         self.assertIn('https://item.jd.com/a_b',plain_price_text('[售价 _¥_ _31_](https://item.jd.com/a_b)'))
+
+class BookVariantTests(unittest.TestCase):
+    def test_single_volume_does_not_use_bundle_price(self):
+        pages=[{'title':'高数上下册','url':'https://kongfz.com/book','content':'高等数学 第七版 上下册 ￥9.00'}]
+        candidate={'sourceIndex':0,'price':9,'quote':pages[0]['content'],'kind':'used'}
+        self.assertEqual(verified_samples([candidate],pages,'同济 高等数学 第七版 上册'),[])
+        self.assertEqual(len(verified_samples([candidate],pages,'同济 高等数学 第七版 上下册')),1)
