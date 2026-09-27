@@ -13,3 +13,13 @@ export async function analyzePhoto(image,signal,note=''){
  return {name:d.name.slice(0,40),description:d.description.slice(0,1500),category:['数码装备','书籍文具','宿舍好物','绿植生活'].includes(d.category)?d.category:'',questions:Array.isArray(d.questions)?[...new Set(d.questions.filter(q=>['function','defects','accessories'].includes(q)))].slice(0,3):[],guidance:'AI 草稿 · 待你确认。'+(typeof d.guidance==='string'?d.guidance.slice(0,300):'请核对真实状况、功能与配件。')};
 }
 export const aiAvailable=Boolean(import.meta.env.VITE_AI_ENDPOINT);
+
+export async function generateWriting(payload,signal){
+ const endpoint=import.meta.env.VITE_AI_ENDPOINT;
+ if(!endpoint)throw new Error('AI 服务尚未连接，可以继续自己填写。');
+ const response=await fetch(`${endpoint.replace(/\/$/,'')}/writing-assist`,{method:'POST',headers:aiHeaders(),body:JSON.stringify(payload),signal});
+ if(!response.ok)throw new Error(response.status===401?'请填写正确的 AI 服务访问码。':response.status===429?'服务正忙，请稍后重试。':'生成暂时不可用，你填写的内容已保留。');
+ const data=await response.json();
+ if(!Array.isArray(data.questions)||data.questions.some(q=>typeof q!=='string')||typeof data[payload.mode==='seller'?'description':'message']!=='string')throw new Error('生成内容不完整，请重试。');
+ return data;
+}

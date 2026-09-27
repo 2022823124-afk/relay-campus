@@ -1,3 +1,4 @@
+import {WritingAssistant} from './WritingAssistant';
 import React,{useState,useRef,useEffect} from 'react';
 import {Camera,Check,CheckCircle,ArrowLeft,ArrowRight,Sparkle,MapPin,UploadSimple} from '@phosphor-icons/react';
 import {schools,gates,meetingLabel,validMeeting} from './island';
@@ -66,6 +67,7 @@ export function Publish({Modal,close,submit,school,items=[],initialMode='sale'})
    <div className="notice compact" role="status">{guidance}</div>
    <div className="quick-card"><img src={d.image} alt="待发布的物品"/><label className="field">物品名称<input maxLength={40} value={d.name} onChange={e=>set('name',e.target.value)}/></label></div>
    <label className="field">物品状况 · 可以直接修改<textarea rows={3} maxLength={1500} value={d.description} onChange={e=>set('description',e.target.value)} placeholder="简单说说功能、磨损和配件；不知道的可以写未知。"/></label>
+   <WritingAssistant mode="seller" name={d.name} description={d.description} onApply={text=>set('description',text)}/>
    {questions.length>0&&<div className="quick-checks"><b>再补充这些就更清楚（可跳过）</b>{questions.filter(k=>followups[k]).map(k=><div key={k}><p>{followups[k].title}</p><div className="quick-questions">{followups[k].choices.map(a=><button key={a} className={`outline-button ${answers[k]===a?'selected':''}`} aria-pressed={answers[k]===a} onClick={()=>{setAnswers(v=>({...v,[k]:v[k]===a?'':a}));set('confirmed',false)}}>{a}</button>)}</div></div>)}</div>}
    <div className={`quote-comparison ${d.price==='0'?'free-quote':''}`}><div>{mode!=='free'&&<><label className="field">你的报价<input type="number" min="0" step="0.01" inputMode="decimal" value={d.price} onChange={e=>set('price',e.target.value)} placeholder="由你决定"/></label>
    <button className="outline-button quick-free" aria-pressed={d.price==='0'} onClick={()=>{set('price','0');setMode('free')}}>改为免费接力</button></>}{mode==='free'&&<div className="free-price-note"><b>免费接力 · ¥0</b><p>把领取条件说清楚，比定价更重要。</p><button className="text-link" onClick={()=>{setMode('sale');set('price','')}}>改为出售</button></div>}

@@ -159,3 +159,25 @@ def create_transaction(payload: TransactionRequest):
         raise HTTPException(400, str(exc)) from exc
     except Exception as exc:
         raise HTTPException(502, '成交记录暂时无法写入数据库') from exc
+
+
+class WritingRequest(BaseModel):
+    mode: str = Field(pattern='^(seller|buyer)$')
+    name: str = Field(min_length=1, max_length=80)
+    description: str = Field(min_length=1, max_length=1500)
+    note: str = Field(default='', max_length=1000)
+
+
+@app.post('/writing-assist')
+def writing_assist(payload: WritingRequest):
+    from writing import generate_writing
+    if not slot.acquire(blocking=False):
+        raise HTTPException(429, '服务正忙，请稍后重试')
+    try:
+        return generate_writing(payload.mode, payload.name, payload.description, payload.note)
+    except NotConfigured as exc:
+        raise HTTPException(503, str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(502, '文案生成暂时不可用，已保留你的内容，请稍后重试') from exc
+    finally:
+        slot.release()

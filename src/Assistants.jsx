@@ -1,8 +1,8 @@
 import React,{useState,useRef,useEffect} from 'react';
 import {PaperPlaneTilt,Sparkle} from '@phosphor-icons/react';
 import {platformReply,itemReply} from './island';
-export function Assistant({item}){
- const [q,setQ]=useState(''),[log,setLog]=useState([]),[enabled,setEnabled]=useState(true);
+export function Assistant({item,initialMessage=''}){
+ const [q,setQ]=useState(initialMessage),[log,setLog]=useState([]),[enabled,setEnabled]=useState(true);
  const logRef=useRef();
  useEffect(()=>{const el=logRef.current;if(el)el.scrollTop=el.scrollHeight},[log]);
  const ask=value=>{if(!value.trim())return;setLog(v=>[...v,{role:'you',text:value.trim()},{role:'assistant',text:item&&!enabled?'消息仅保存在当前演示中，尚未发送给真实卖家。':item?itemReply(value,item):platformReply(value)}]);setQ('')};
