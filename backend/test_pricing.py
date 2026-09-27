@@ -41,3 +41,23 @@ class CurrencyEvidenceTests(unittest.TestCase):
             self.assertEqual(result['sourceLinks'][0]['url'],page['url'])
             self.assertEqual(result['searchedPages'],1)
             self.assertTrue(result['emptyReason'])
+
+class MixedPriceTests(unittest.TestCase):
+    def test_new_and_used_are_separated_without_mixed_estimate(self):
+        from pricing import price_reference
+        from unittest.mock import Mock
+        pages=[{'title':'罗技M185','url':'https://jd.com/used','content':'二手20元'},
+               {'title':'罗技M185新品','url':'https://jd.com/new','content':'新品45元'}]
+        candidates=[{'sourceIndex':0,'price':20,'quote':'二手20元','kind':'used'},
+                    {'sourceIndex':1,'price':45,'quote':'新品45元','kind':'new'}]
+        with patch.dict(os.environ,{'TAVILY_API_KEY':'test'}),patch('pricing.requests.post') as post,patch('pricing.ask',return_value={'samples':candidates}):
+            post.return_value=Mock(**{'json.return_value':{'results':pages}})
+            result=price_reference('罗技M185')
+        self.assertEqual([s['price'] for s in result['samples']],[20])
+        self.assertEqual([s['price'] for s in result['retailSamples']],[45])
+        self.assertIsNone(result['suggested'])
+        self.assertEqual(result['searchedPages'],2)
+
+    def test_unknown_condition_is_not_assumed_used(self):
+        self.assertEqual(verified_samples([{'sourceIndex':0,'price':45,'quote':'45元','kind':'unknown'}],
+            [{'title':'鼠标','url':'https://jd.com/1','content':'45元'}]),[])
