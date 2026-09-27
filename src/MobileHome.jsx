@@ -1,9 +1,10 @@
+import {brandMark} from './BrandWelcome';
 import React from 'react';
 import {ArrowLeft,Recycle,MapPin,CaretDown,MagnifyingGlass,IdentificationCard,X,Camera,BookOpen,Armchair,Plant,SquaresFour,ArrowUpRight,Plus,Heart,UserCircle,ChatCircleDots,Sparkle,Package,ArrowRight} from '@phosphor-icons/react';
 
 const categories=[['全部好物','全部',SquaresFour],['数码装备','数码',Camera],['书籍文具','书籍画材',BookOpen],['宿舍好物','宿舍',Armchair],['绿植生活','绿植',Plant]];
-export function MobileHeader({view,free,scope,onCampus,onLookup,onBack}){
- return <header className="app-mobile-header">{view==='saved'&&(<button className="mobile-back" aria-label="返回上一页" onClick={onBack}><ArrowLeft size={22}/></button>)}<div className="mobile-wordmark"><b>{view==='mine'?'我的接力':view==='messages'?'消息':view==='saved'?'我的收藏':free?'免费接力':'接力卡'}</b></div><button className="mobile-school" onClick={onCampus}><MapPin size={14}/><span>{scope==='all'?'小谷围 · 全岛':scope}</span><CaretDown size={12}/></button><button className="mobile-tool" aria-label="查询物品身份" onClick={onLookup}><IdentificationCard size={23}/></button></header>
+export function MobileHeader({view,free,scope,onCampus,onLookup,onBack,onBrand}){
+ return <header className="app-mobile-header">{view==='saved'&&(<button className="mobile-back" aria-label="返回上一页" onClick={onBack}><ArrowLeft size={22}/></button>)}<div className="mobile-wordmark">{view==='market'&&!free?<button className="mobile-brand-button" aria-label="小芽接力，查看品牌进入页" onClick={onBrand}><img src={brandMark} alt=""/><b>小芽接力</b></button>:<b>{view==='mine'?'我的接力':view==='messages'?'消息':view==='saved'?'我的收藏':free?'免费接力':'小芽接力'}</b>}</div><button className="mobile-school" onClick={onCampus}><MapPin size={14}/><span>{scope==='all'?'小谷围 · 全岛':scope}</span><CaretDown size={12}/></button><button className="mobile-tool" aria-label="查询物品身份" onClick={onLookup}><IdentificationCard size={23}/></button></header>
 }
 export function MobileDiscover({free,view,query,setQuery,cat,setCat,sort,setSort,onBrowse,onPublish,onAssistant,onGarden}){
  return <section className="mobile-discover" aria-label="手机发现页">
@@ -18,7 +19,7 @@ export function MobileProfile({school,saved,drafts,onSaved,onCampus,onAbout,onGa
  return <section className="mobile-profile"><div className="mobile-profile-person"><UserCircle size={56} weight="duotone"/><div><h1>我的校园接力</h1><button onClick={onCampus}>{school}<CaretDown size={12}/></button><small>本机演示身份 · 尚未接入账号</small></div></div><div className="mobile-profile-stats"><button onClick={onSaved}><Heart size={23}/><b>{saved}</b><span>我的收藏</span></button><a href="#my-listings"><Package size={23}/><b>{drafts.length}</b><span>我发布的</span></a><a href="#my-listings"><Recycle size={23}/><b>{drafts.filter(d=>Number(d.price)===0).length}</b><span>免费发布</span></a></div><SproutInvitation onOpen={onGarden}/><button className="profile-about" onClick={onAbout}>物品身份与记录来源 <ArrowRight size={18}/></button></section>
 }
 export function MobileMessages({onAssistant,onBrowse}){
- return <section className="mobile-messages"><h1>消息</h1><p className="messages-caption">沟通和平台帮助，在这里找到。</p><button className="assistant-inbox" onClick={onAssistant}><span><Sparkle size={29} weight="duotone"/></span><div><b>接力卡使用助手</b><small>不知道怎么发布？点这里问一问</small></div><ArrowRight size={19}/></button><div className="messages-empty"><ChatCircleDots size={54} weight="duotone"/><h2>还没有真实会话</h2><p>目前仅提供物品问答演示。<br/>真实私信、预约和消息提醒尚未接入。</p><button className="btn purple" onClick={()=>onBrowse()}>去发现好物 <ArrowRight size={18}/></button></div></section>
+ return <section className="mobile-messages"><h1>消息</h1><p className="messages-caption">沟通和平台帮助，在这里找到。</p><button className="assistant-inbox" onClick={onAssistant}><span><Sparkle size={29} weight="duotone"/></span><div><b>小芽接力使用助手</b><small>不知道怎么发布？点这里问一问</small></div><ArrowRight size={19}/></button><div className="messages-empty"><ChatCircleDots size={54} weight="duotone"/><h2>还没有真实会话</h2><p>目前仅提供物品问答演示。<br/>真实私信、预约和消息提醒尚未接入。</p><button className="btn purple" onClick={()=>onBrowse()}>去发现好物 <ArrowRight size={18}/></button></div></section>
 }
 
 export function SproutInvitation({onOpen}){return <button className="sprout-invitation" onClick={onOpen}><img src={`${import.meta.env.BASE_URL}assets/relay-companion.webp`} alt=""/><span className="sprout-invite-copy"><b>接力小芽</b><small>养成伙伴 · 本机试玩</small></span><ArrowRight size={20}/></button>}

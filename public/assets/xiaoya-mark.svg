@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none">
+<title>小芽接力：背着紫色挎包的新叶伙伴</title>
+<path d="M127 101C93 99 65 74 68 31C108 33 135 59 127 101Z" fill="#A6B779" stroke="#51445F" stroke-width="6" stroke-linejoin="round"/>
+<path d="M131 101C134 65 158 51 193 60C190 91 165 113 131 101Z" fill="#C4CE96" stroke="#51445F" stroke-width="6" stroke-linejoin="round"/>
+<path d="M91 55L125 102M132 100L169 77" stroke="#758951" stroke-width="4" stroke-linecap="round"/>
+<path d="M123 99C102 111 83 133 77 159C66 170 61 185 66 192C71 197 77 191 81 186C79 209 90 224 108 227L109 235C111 242 121 242 124 231H143C146 242 156 242 158 234L159 225C178 218 183 205 180 185C187 195 193 195 197 190C201 182 192 166 185 158C178 129 157 109 137 99C134 103 127 103 123 99Z" fill="#FFF8E8" stroke="#51445F" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="110" cy="153" r="5" fill="#51445F"/><circle cx="152" cy="153" r="5" fill="#51445F"/>
+<path d="M125 158Q131 165 137 158" stroke="#51445F" stroke-width="4" stroke-linecap="round"/>
+<path d="M82 176Q109 195 148 205" stroke="#51445F" stroke-width="10" stroke-linecap="round"/>
+<path d="M82 176Q109 195 148 205" stroke="#B6A0C9" stroke-width="5" stroke-linecap="round"/>
+<path d="M141 188L177 183L181 210Q179 223 161 225Q144 226 143 213Z" fill="#B6A0C9" stroke="#51445F" stroke-width="5" stroke-linejoin="round"/>
+<path d="M154 200L168 198" stroke="#FFF8E8" stroke-width="4" stroke-linecap="round"/>
+</svg>

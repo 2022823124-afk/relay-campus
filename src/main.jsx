@@ -16,6 +16,6 @@ function Presentation(){
   return ()=>query.removeEventListener('change',change);
  },[]);
  if(embedded||!desktop)return <App/>;
- return <main className="phone-demo-stage"><div className="phone-demo-device"><iframe className="phone-demo-screen" title="接力卡 · 手机版演示" src={window.location.href}/></div></main>;
+ return <main className="phone-demo-stage"><div className="phone-demo-device"><iframe className="phone-demo-screen" title="小芽接力 · 手机版演示" src={window.location.href}/></div></main>;
 }
 createRoot(document.getElementById("root")).render(<React.StrictMode><Presentation/></React.StrictMode>);
