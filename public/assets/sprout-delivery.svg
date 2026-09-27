@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="180" viewBox="0 0 160 180" fill="none">
+<title>小芽抱着旧书纸箱去接力</title>
+<style>
+.leaves{transform-origin:79px 60px;animation:leaves 3.6s ease-in-out infinite}
+@keyframes leaves{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(5deg)}}
+@media(prefers-reduced-motion:reduce){.leaves{animation:none}}
+</style>
+<g stroke="#69505A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+<g class="leaves">
+<path d="M79 64C77 42 49 45 43 13C70 13 90 29 79 64Z" fill="#A8B27D"/>
+<path d="M79 63C82 36 101 27 124 35C120 57 94 60 79 63Z" fill="#B8C38B"/>
+<path d="M79 61L54 25M81 60L111 41" stroke="#808C60" stroke-width="1.5"/>
+<path d="M64 37L64 28M72 46L62 43M94 50L103 51" stroke="#808C60" stroke-width="1.1"/>
+</g>
+<path d="M69 62C76 56 86 58 93 66C110 86 119 109 120 130C122 147 110 157 98 159L97 168C89 173 83 169 83 162L64 160C63 169 54 170 50 165L51 156C34 151 32 137 36 120C39 99 53 76 69 62Z" fill="#FFF5DD"/>
+<path d="M45 93L102 135" stroke="#A98AAF" stroke-width="6"/>
+<path d="M44 93L101 135" stroke="#76627E" stroke-width="1"/>
+<path d="M104 117L130 123L124 149Q110 154 99 142Z" fill="#BAA0C9"/>
+<path d="M104 118L129 123L120 135L103 130Z" fill="#CCB5D7"/>
+<path d="M111 139Q108 131 115 130Q119 137 111 139Z" fill="#A4B17B" stroke-width="1.3"/>
+<circle cx="64" cy="88" r="2.7" fill="#69505A" stroke="none"/>
+<circle cx="90" cy="88" r="2.7" fill="#69505A" stroke="none"/>
+<path d="M74 92Q78 98 82 92" stroke-width="2"/>
+<ellipse cx="57" cy="94" rx="5" ry="2.5" fill="#EBC7B6" stroke="none"/>
+<ellipse cx="97" cy="94" rx="5" ry="2.5" fill="#EBC7B6" stroke="none"/>
+<path d="M50 108L88 102L115 112L108 147L56 147Z" fill="#D8B58A"/>
+<path d="M57 105L60 92L92 94L89 114Z" fill="#A3AF89"/>
+<path d="M62 96L87 98L85 111L60 109" fill="#F7EAD4" stroke-width="1.4"/>
+<path d="M70 104L74 97L102 107L96 118Z" fill="#B8A1C6"/>
+<path d="M50 108L80 114L115 112L108 147L56 147Z" fill="#E5C9A2"/>
+<path d="M80 114L79 146" stroke="#B79271" stroke-width="1.4"/>
+<path d="M56 123L57 135Q42 138 41 128Q42 121 49 119" fill="#FFF5DD"/>
+<path d="M108 119Q120 117 120 126Q120 134 108 133Z" fill="#FFF5DD"/>
+<path d="M87 128L99 128M89 133L97 133" stroke="#AA856B" stroke-width="1.5"/>
+</g>
+</svg>

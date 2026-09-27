@@ -1,3 +1,4 @@
+import './sprout-delivery.css';
 import {brandMark} from './BrandWelcome';
 import React from 'react';
 import {ArrowLeft,Recycle,MapPin,CaretDown,MagnifyingGlass,IdentificationCard,X,Camera,BookOpen,Armchair,Plant,SquaresFour,ArrowUpRight,Plus,Heart,UserCircle,ChatCircleDots,Sparkle,Package,ArrowRight} from '@phosphor-icons/react';
@@ -22,4 +23,4 @@ export function MobileMessages({onAssistant,onBrowse}){
  return <section className="mobile-messages"><h1>消息</h1><p className="messages-caption">沟通和平台帮助，在这里找到。</p><button className="assistant-inbox" onClick={onAssistant}><span><Sparkle size={29} weight="duotone"/></span><div><b>小芽接力使用助手</b><small>不知道怎么发布？点这里问一问</small></div><ArrowRight size={19}/></button><div className="messages-empty"><ChatCircleDots size={54} weight="duotone"/><h2>还没有真实会话</h2><p>目前仅提供物品问答演示。<br/>真实私信、预约和消息提醒尚未接入。</p><button className="btn purple" onClick={()=>onBrowse()}>去发现好物 <ArrowRight size={18}/></button></div></section>
 }
 
-export function SproutInvitation({onOpen}){return <button className="sprout-invitation" onClick={onOpen}><img src={`${import.meta.env.BASE_URL}assets/relay-companion.webp`} alt=""/><span className="sprout-invite-copy"><b>接力小芽</b><small>养成伙伴 · 本机试玩</small></span><ArrowRight size={20}/></button>}
+export function SproutInvitation({onOpen}){return <button className="sprout-invitation" onClick={onOpen}><span className="sprout-delivery" aria-hidden="true"><img src={`${import.meta.env.BASE_URL}assets/sprout-delivery.svg`} alt=""/><i/></span><span className="sprout-invite-copy"><b>接力小芽</b><small>养成伙伴 · 本机试玩</small></span><ArrowRight size={20}/></button>}

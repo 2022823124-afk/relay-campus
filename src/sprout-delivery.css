@@ -1,0 +1,7 @@
+/* Quiet motion in the small invitation, independent of the game artwork. */
+.sprout-invitation .sprout-delivery{position:relative;display:block;flex:0 0 58px;width:58px;height:64px;border-radius:10px;overflow:hidden;background:#f2eadc}
+.sprout-delivery img{position:relative;z-index:1;display:block;width:100%;height:100%;object-fit:contain;transform-origin:50% 85%;animation:sprout-carry 3.6s ease-in-out infinite}
+.sprout-delivery i{position:absolute;left:23%;right:23%;bottom:5px;height:4px;border-radius:50%;background:#9e8d7a24;animation:sprout-shadow 3.6s ease-in-out infinite}
+@keyframes sprout-carry{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-3px) rotate(2deg)}}
+@keyframes sprout-shadow{0%,100%{transform:scaleX(1);opacity:.8}50%{transform:scaleX(.8);opacity:.45}}
+@media(prefers-reduced-motion:reduce){.sprout-delivery img,.sprout-delivery i{animation:none}}
