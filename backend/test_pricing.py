@@ -61,3 +61,25 @@ class MixedPriceTests(unittest.TestCase):
     def test_unknown_condition_is_not_assumed_used(self):
         self.assertEqual(verified_samples([{'sourceIndex':0,'price':45,'quote':'45元','kind':'unknown'}],
             [{'title':'鼠标','url':'https://jd.com/1','content':'45元'}]),[])
+
+class SourceParserTests(unittest.TestCase):
+    def test_product_price_not_unrelated_recommendation(self):
+        from pricing import direct_candidates
+        url='https://item.jd.com/product/pWrkPb75a1pc2I1p5op2pw.html'
+        page={'url':url,'content':'推荐 M220 ¥69\n罗技M185 无线鼠标 收藏\n¥\n39.00'}
+        self.assertEqual(direct_candidates([page])[0]['price'],39)
+        page['content']='推荐 M220 ¥69\nM185 无线鼠标 登录查看'
+        self.assertEqual(direct_candidates([page]),[])
+
+    def test_price_at_end_is_retained(self):
+        from pricing import price_content
+        text='导航'*10000+'LACK 拉克 黑色 55x55 ¥69.99'
+        self.assertIn('¥69.99',price_content({'raw_content':text}))
+
+class MarkdownPriceTests(unittest.TestCase):
+    def test_markdown_currency_and_whitespace_are_readable_evidence(self):
+        pages=[{'title':'M185','url':'https://jd.com/p','content':'新品 _¥_ _39.00_'}]
+        for quote in ['新品 ¥ 39.00','新品 _¥_ _39.00_']:
+            samples=verified_samples([{'sourceIndex':0,'price':39,'quote':quote,'kind':'new'}],pages)
+            self.assertEqual(samples[0]['price'],39)
+        self.assertEqual(verified_samples([{'sourceIndex':0,'price':49,'quote':'新品 ¥ 49.00','kind':'new'}],pages),[])

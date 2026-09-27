@@ -10,6 +10,10 @@ import requests
 from pipeline import NotConfigured, ask
 
 
+def plain_price_text(text):
+    return re.sub(r'\s+', ' ', re.sub(r'[*_`]', '', text)).strip()
+
+
 def verified_samples(candidates, pages):
     output, seen = [], set()
     for c in candidates[:12]:
@@ -23,7 +27,10 @@ def verified_samples(candidates, pages):
         if c.get('kind', 'used') not in ('used', 'new'):
             continue
         page = pages[index]
-        if not isinstance(quote, str) or not 1 <= len(quote) <= 300 or quote not in page['content']:
+        if not isinstance(quote, str) or not 1 <= len(quote) <= 300:
+            continue
+        quote = plain_price_text(quote)
+        if quote not in plain_price_text(page['content']):
             continue
         # The exact number must appear as an RMB amount in the cited source.
         amounts = re.findall(r'(?:人民币|RMB|CNY|[￥¥])\s*(\d+(?:\.\d{1,2})?)(?![\d.万千])|(?<![\d.])(\d+(?:\.\d{1,2})?)\s*元', quote)
@@ -47,18 +54,18 @@ def known_sources(name):
         return ['https://item.jd.com/product/pWrkPb75a1pc2I1p5op2pw.html']
     if '高等数学' in name and re.search(r'第?[七7]版', name) and '上' in name:
         return ['https://www.hep.com.cn/book/show/f9a5ba29-e58e-4a42-9c1b-830a0e28f1f3']
-    if re.search(r'lack|拉克', name, re.I):
+    if re.search(r'lack|拉克', name, re.I) and '黑色' in name and re.search(r'55\s*[xX×*]\s*55',name):
         return ['https://www.ikea.cn/cn/zh/p/lack-la-ke-bian-zhuo-hei-se-00352988/']
     return []
 
 
 def price_content(page):
-    text = str(page.get('raw_content') or '')
+    text = plain_price_text(str(page.get('raw_content') or ''))
     # Retain price context near the end of product pages, not only navigation.
     fragments = [text[:2000]]
     for match in list(re.finditer(r'[￥¥]|人民币|\d(?:\.\d+)?\s*元', text))[:24]:
         fragments.append(text[max(0, match.start()-400):match.end()+400])
-    return (str(page.get('content') or '')[:3000] + '\n' + '\n'.join(fragments))[:14000]
+    return (plain_price_text(str(page.get('content') or ''))[:3000] + '\n' + '\n'.join(fragments))[:14000]
 
 
 def direct_candidates(pages):
@@ -76,7 +83,7 @@ def direct_candidates(pages):
             match = re.search(pattern, text)
             if match:
                 candidates.append({'sourceIndex': i, 'price': float(match.group(2)), 'kind': 'new',
-                                   'condition': '新品标价，库存以来源页面为准', 'quote': match.group(1)})
+                                   'condition': '新品标价 · 页面提示缺货' if '暂时缺货' in text else '新品标价，库存以来源页面为准', 'quote': match.group(1)})
     return candidates
 
 def price_reference(name):
@@ -140,7 +147,6 @@ def price_reference(name):
             'suggested': None,
             'checkedAt': datetime.now(timezone.utc).isoformat(),
             'searchedPages': len(pages),
-            'diagnostics': {'proposed': len(data['samples']), 'verified': len(verified), 'priceEvidence': [p['content'][max(0,m.start()-60):m.end()+80] for p in pages[:1] for m in list(re.finditer(r'[￥¥]|定价',p['content']))[:3]]},
             'sourceLinks': [{'title':p['title'][:100], 'url':p['url']} for p in pages if urlsplit(p['url']).scheme in ('http','https')][:6],
             'emptyReason': None if samples else ('暂未查到可核对的二手报价；若有新品价格，会单独列在下方供比较。' if pages else '搜索服务暂未返回相关网页，请补充品牌和准确型号。'),
             'source': 'Public Web Asking Price', 'requiresConfirmation': True}
