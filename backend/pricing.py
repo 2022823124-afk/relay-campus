@@ -62,7 +62,7 @@ def known_sources(name):
 def price_content(page):
     text = plain_price_text(str(page.get('raw_content') or ''))
     # Retain price context near the end of product pages, not only navigation.
-    fragments = [text[:2000]]
+    fragments = [text[:2000], text[-6000:]]
     for match in list(re.finditer(r'[￥¥]|人民币|\d(?:\.\d+)?\s*元', text))[:24]:
         fragments.append(text[max(0, match.start()-400):match.end()+400])
     return (plain_price_text(str(page.get('content') or ''))[:3000] + '\n' + '\n'.join(fragments))[:14000]
