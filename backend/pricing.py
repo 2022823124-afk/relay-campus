@@ -41,10 +41,11 @@ def price_reference(name):
     key = os.getenv('TAVILY_API_KEY')
     if not key:
         raise NotConfigured('市场价格检索尚未配置')
+    domains = ['kongfz.com'] if re.search(r'教材|课本|小说|诗集|词典|高等数学|线性代数|大学英语', name) else ['jd.com', 'goofish.com', 'zhuanzhuan.com', 'kongfz.com']
     response = requests.post('https://api.tavily.com/search',
         headers={'Authorization': f'Bearer {key}'},
         json={'query': f'{name} 二手 商品 售价', 'topic': 'general', 'max_results': 10,
-              'include_domains': ['jd.com', 'kongfz.com', 'goofish.com', 'zhuanzhuan.com'],
+              'include_domains': domains,
               'search_depth': 'advanced', 'chunks_per_source': 3, 'include_answer': False, 'include_raw_content': 'markdown',
               'include_published_date': True}, timeout=20)
     response.raise_for_status()
