@@ -83,3 +83,10 @@ class MarkdownPriceTests(unittest.TestCase):
             samples=verified_samples([{'sourceIndex':0,'price':39,'quote':quote,'kind':'new'}],pages)
             self.assertEqual(samples[0]['price'],39)
         self.assertEqual(verified_samples([{'sourceIndex':0,'price':49,'quote':'新品 ¥ 49.00','kind':'new'}],pages),[])
+
+class LinkedOfferTests(unittest.TestCase):
+    def test_recommended_offer_links_to_its_own_product(self):
+        pages=[{'title':'新品M185','url':'https://item.jd.com/main','content':'[二手M185 99成新 ¥31.00](https://item.jd.com/used)'}]
+        result=verified_samples([{'sourceIndex':0,'price':31,'quote':'二手M185 99成新 ¥31.00','kind':'used'}],pages)
+        self.assertEqual(result[0]['url'],'https://item.jd.com/used')
+        self.assertIn('二手M185',result[0]['title'])

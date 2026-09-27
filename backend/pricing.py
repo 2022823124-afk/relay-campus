@@ -37,10 +37,13 @@ def verified_samples(candidates, pages):
         if not any(float(a or b) == price for a, b in amounts):
             continue
         url = page['url']
+        linked = re.search(re.escape(quote) + r'\s*\]\((https://item\.jd\.com/[^)\s]+)\)', plain_price_text(page['content']))
+        if linked:
+            url = linked.group(1)
         if url in seen or urlsplit(url).scheme not in ('http', 'https'):
             continue
         seen.add(url)
-        output.append({'title': page['title'][:100], 'price': price, 'url': url,
+        output.append({'title': (quote if linked else page['title'])[:100], 'price': price, 'url': url,
                        'source': '公开网页报价', 'publishedAt': page.get('published_date'),
                        'quote': quote, 'kind': c.get('kind', 'used'),
                        'condition': str(c.get('condition', '成色未说明'))[:60]})
@@ -134,7 +137,7 @@ def price_reference(name):
                '目标没有品牌型号时可返回同类具体商品，但需保留其完整商品名称；目标有型号时不可跨型号。'
                '输出condition标明成色、规格或出版社定价；缺货也必须标明。'
                '不猜价格，不把挂牌价称为成交价。不够可比就返回空数组。'
-               '网页可能包含推荐商品，必须确认金额属于目标商品而非旁边的推荐项。'
+               '网页可能包含推荐商品：只有标题型号匹配且带独立商品链接、明确标价的推荐商品才可返回，quote必须包含完整标题及价格。其他推荐内容不采用。'
                '没有发布日期的商品页可作为挂牌参考，但不能声称实时在售；不要仅因日期未知而排除。'
                '只返回 JSON {"samples":[{"sourceIndex":0,"price":10,"kind":"used或new","condition":"成色和规格","quote":"资料中包含明确人民币金额的逐字短句"}]}。',
                json.dumps({'target': name, 'pages': pages}, ensure_ascii=False))
