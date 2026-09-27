@@ -21,3 +21,13 @@ export async function generateWriting(payload,signal){
  if(!Array.isArray(data.questions)||data.questions.some(q=>typeof q!=='string')||typeof data[payload.mode==='seller'?'description':'message']!=='string')throw new Error('生成内容不完整，请重试。');
  return data;
 }
+
+export async function askPlatform(messages,signal){
+ const endpoint=import.meta.env.VITE_AI_ENDPOINT;
+ if(!endpoint)throw new Error('AI 服务尚未连接，请稍后再试。');
+ const response=await fetch(`${endpoint.replace(/\/$/,'')}/platform-chat`,{method:'POST',headers:aiHeaders(),body:JSON.stringify({messages:messages.slice(-7)}),signal});
+ if(!response.ok)throw new Error(response.status===429?'AI 正忙，请稍后重试。':response.status===401?'服务暂未开放，请联系网站维护者。':'AI 暂时无法回复，请重试。');
+ const data=await response.json();
+ if(typeof data.answer!=='string'||!data.answer.trim()||data.source!=='model')throw new Error('AI 回复不完整，请重试。');
+ return data.answer;
+}

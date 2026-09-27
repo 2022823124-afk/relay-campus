@@ -199,3 +199,29 @@ def watch_updates(payload: WatchRequest):
         raise HTTPException(503, str(exc)) from exc
     except Exception as exc:
         raise HTTPException(502, '暂时无法检查更新') from exc
+
+
+class HelpMessage(BaseModel):
+    role: str = Field(pattern='^(user|assistant)$')
+    content: str = Field(min_length=1, max_length=1500)
+
+
+class HelpRequest(BaseModel):
+    messages: list[HelpMessage] = Field(min_length=1, max_length=7)
+
+
+@app.post('/platform-chat')
+def platform_chat(payload: HelpRequest):
+    from platform_assistant import platform_answer
+    if payload.messages[-1].role != 'user' or not payload.messages[-1].content.strip():
+        raise HTTPException(400, '请先输入问题')
+    if not slot.acquire(blocking=False):
+        raise HTTPException(429, 'AI 正忙，请稍后重试')
+    try:
+        return platform_answer([_model_data(m) for m in payload.messages])
+    except NotConfigured as exc:
+        raise HTTPException(503, 'AI 服务尚未配置完成') from exc
+    except Exception as exc:
+        raise HTTPException(502, 'AI 暂时无法回复，请重试') from exc
+    finally:
+        slot.release()
