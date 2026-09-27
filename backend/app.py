@@ -162,7 +162,7 @@ def create_transaction(payload: TransactionRequest):
 
 
 class WritingRequest(BaseModel):
-    mode: str = Field(pattern='^(seller|buyer)$')
+    mode: str = Field(pattern='^(seller|buyer|focus)$')
     name: str = Field(min_length=1, max_length=80)
     description: str = Field(min_length=1, max_length=1500)
     note: str = Field(default='', max_length=1000)
@@ -181,3 +181,21 @@ def writing_assist(payload: WritingRequest):
         raise HTTPException(502, '文案生成暂时不可用，已保留你的内容，请稍后重试') from exc
     finally:
         slot.release()
+
+
+class WatchRequest(BaseModel):
+    ids: list[str] = Field(min_length=1, max_length=50)
+
+
+@app.post('/watch-updates')
+def watch_updates(payload: WatchRequest):
+    import re
+    from database import watched_items
+    if any(not re.fullmatch(r'[A-Za-z0-9_-]{4,80}', value) for value in payload.ids):
+        raise HTTPException(400, '物品编号格式不正确')
+    try:
+        return {'items': watched_items(payload.ids)}
+    except DatabaseNotConfigured as exc:
+        raise HTTPException(503, str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(502, '暂时无法检查更新') from exc

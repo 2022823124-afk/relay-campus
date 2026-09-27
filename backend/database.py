@@ -187,3 +187,16 @@ def platform_price_reference(category):
             'suggested': round(median(s['price'] for s in samples), 2) if len(samples) >= 3 else None,
             'checkedAt': datetime.now(timezone.utc).isoformat(),
             'source': 'Platform Transaction', 'requiresConfirmation': True}
+
+
+def watched_items(ids):
+    """Only published/sold listing facts, never drafts or private proof metadata."""
+    rows = _rest('GET', 'items', params={
+        'client_item_id': 'in.(' + ','.join(ids) + ')',
+        'status': 'in.(published,sold)',
+        'select': 'client_item_id,asking_price,condition,description,status,version',
+        'limit': 50,
+    }) or []
+    return [{'id': r['client_item_id'], 'price': r['asking_price'],
+             'condition': r['condition'], 'description': r['description'],
+             'sold': r['status'] == 'sold', 'version': r['version']} for r in rows]
