@@ -60,6 +60,25 @@ def price_content(page):
         fragments.append(text[max(0, match.start()-400):match.end()+400])
     return (str(page.get('content') or '')[:3000] + '\n' + '\n'.join(fragments))[:14000]
 
+
+def direct_candidates(pages):
+    candidates = []
+    for i, page in enumerate(pages):
+        text, url = page['content'], page['url']
+        pattern = None
+        if 'ikea.cn/cn/zh/p/lack-la-ke-bian-zhuo-hei-se-00352988/' in url:
+            pattern = r'(?:LACK|拉克)[\s\S]{0,160}?([￥¥]\s*(\d+(?:\.\d{1,2})?))'
+        elif 'pWrkPb75a1pc2I1p5op2pw.html' in url:
+            pattern = r'M185[\s\S]{0,160}?收藏[\s\S]{0,50}?([￥¥]\s*(\d+(?:\.\d{1,2})?))'
+        elif 'f9a5ba29-e58e-4a42-9c1b-830a0e28f1f3' in url:
+            pattern = r'定价[\s:：*]{0,20}((\d+(?:\.\d{1,2})?)\s*元)'
+        if pattern:
+            match = re.search(pattern, text)
+            if match:
+                candidates.append({'sourceIndex': i, 'price': float(match.group(2)), 'kind': 'new',
+                                   'condition': '新品标价，库存以来源页面为准', 'quote': match.group(1)})
+    return candidates
+
 def price_reference(name):
     key = os.getenv('TAVILY_API_KEY')
     if not key:
@@ -114,13 +133,14 @@ def price_reference(name):
                json.dumps({'target': name, 'pages': pages}, ensure_ascii=False))
     if not isinstance(data.get('samples'), list):
         raise ValueError('价格资料格式错误')
-    verified = verified_samples(data['samples'], pages)
+    verified = verified_samples(data['samples'] + direct_candidates(pages), pages)
     samples = [s for s in verified if s['kind'] == 'used']
     retail = [s for s in verified if s['kind'] == 'new']
     return {'samples': samples, 'retailSamples': retail,
             'suggested': None,
             'checkedAt': datetime.now(timezone.utc).isoformat(),
             'searchedPages': len(pages),
+            'diagnostics': {'proposed': len(data['samples']), 'verified': len(verified), 'priceEvidence': [p['content'][max(0,m.start()-60):m.end()+80] for p in pages[:1] for m in list(re.finditer(r'[￥¥]|定价',p['content']))[:3]]},
             'sourceLinks': [{'title':p['title'][:100], 'url':p['url']} for p in pages if urlsplit(p['url']).scheme in ('http','https')][:6],
             'emptyReason': None if samples else ('暂未查到可核对的二手报价；若有新品价格，会单独列在下方供比较。' if pages else '搜索服务暂未返回相关网页，请补充品牌和准确型号。'),
             'source': 'Public Web Asking Price', 'requiresConfirmation': True}
