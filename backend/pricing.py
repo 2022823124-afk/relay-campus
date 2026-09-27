@@ -11,7 +11,9 @@ from pipeline import NotConfigured, ask
 
 
 def plain_price_text(text):
-    return re.sub(r'\s+', ' ', re.sub(r'[*_`]', '', text)).strip()
+    parts = re.split(r'(https?://[^\s)]+)', text)
+    text = ''.join(part if part.startswith(('https://', 'http://')) else re.sub(r'[*_`]', '', part) for part in parts)
+    return re.sub(r'\s+', ' ', text).strip()
 
 
 def verified_samples(candidates, pages):

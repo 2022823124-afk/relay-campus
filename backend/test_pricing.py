@@ -90,3 +90,8 @@ class LinkedOfferTests(unittest.TestCase):
         result=verified_samples([{'sourceIndex':0,'price':31,'quote':'二手M185 99成新 ¥31.00','kind':'used'}],pages)
         self.assertEqual(result[0]['url'],'https://item.jd.com/used')
         self.assertIn('二手M185',result[0]['title'])
+
+class EvidenceUrlTests(unittest.TestCase):
+    def test_markdown_normalization_preserves_url_underscores(self):
+        from pricing import plain_price_text
+        self.assertIn('https://item.jd.com/a_b',plain_price_text('[售价 _¥_ _31_](https://item.jd.com/a_b)'))
