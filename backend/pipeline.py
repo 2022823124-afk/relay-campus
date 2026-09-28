@@ -116,7 +116,7 @@ def listing_draft(raw, run=ask, note=''):
         'category 只能为 数码装备/书籍文具/宿舍好物/绿植生活，不确定填空字符串。'
         'questions 是最多3个不重复的待确认字段，只能选 function/defects/accessories；已明确回答的字段不得出现，可以为空数组。'
         'photoTips 根据主图可见范围与物主描述，给0到2个具体补拍建议；清楚的部位不重复建议。'
-        '另返回cameraGuide，包含frame（从lamp/book/plant/device/furniture/generic选择最贴近主图物品的轮廓，不确定用generic）、title（拍摄目标40字内）、angle（针对该物品的构图指导120字内）。'
+        '另返回cameraGuide，包含frame（从strawCup/cup/bottle/lamp/book/plant/device/furniture/generic选择最贴近主图物品的轮廓：带吸管杯选strawCup，普通杯选cup，瓶子选bottle，不确定用generic）、title（拍摄目标40字内）、angle（针对该物品的构图指导120字内）。'
         '每项包含slot（side或defect）、title（拍什么，20字内）、reason（为什么需要，60字内）、angle（角度与光线，60字内）。'
         '不可把看不清说成确定缺陷，不要求掩盖瑕疵、美化或危险拆机；无法确认功能时建议安全展示，不声称照片证明功能。'
         '只返回 JSON：{"name":"物品名","description":"可见状况及注明来源的物主说法",'
@@ -135,7 +135,7 @@ def listing_draft(raw, run=ask, note=''):
     result['questions'] = list(dict.fromkeys(q for q in questions
                                             if isinstance(q, str) and q in ['function', 'defects', 'accessories']))[:3]
     guide = draft.get('cameraGuide')
-    if isinstance(guide, dict) and guide.get('frame') in ('lamp','book','plant','device','furniture','generic') and all(isinstance(guide.get(k), str) and 0 < len(guide[k]) <= n for k,n in [('title',40),('angle',120)]):
+    if isinstance(guide, dict) and guide.get('frame') in ('strawCup','cup','bottle','lamp','book','plant','device','furniture','generic') and all(isinstance(guide.get(k), str) and 0 < len(guide[k]) <= n for k,n in [('title',40),('angle',120)]):
         result['cameraGuide'] = {k: guide[k] for k in ('frame','title','angle')}
     else:
         result['cameraGuide'] = None
