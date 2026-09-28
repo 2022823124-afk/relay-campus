@@ -12,22 +12,23 @@ export function Publish({Modal,close,submit,school,items=[],initialMode='sale'})
  const [mode,setMode]=useState(initialMode),[pickupNote,setPickupNote]=useState('');
  const [step,setStep]=useState(1),[note,setNote]=useState('');
  const [d,setD]=useState({name:'',image:'',originalImage:'',description:'',category:'',condition:'见物品描述',price:initialMode==='free'?'0':'',school:schools.includes(school)?school:'',gate:'',history:'unknown',proof:'',previousPrice:'',date:'',source:'',sellerFaq:'',confirmed:false});
+ const [photoTips,setPhotoTips]=useState([]);
  const [extra,setExtra]=useState({}),[error,setError]=useState(''),[busy,setBusy]=useState(false),[adjusted,setAdjusted]=useState(false),[showOriginal,setShowOriginal]=useState(false),[guidance,setGuidance]=useState(''),[questions,setQuestions]=useState([]),[answers,setAnswers]=useState({});
  const controller=useRef(),lastInput=useRef(''),mounted=useRef(true);
  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;controller.current?.abort()}},[]);
  const set=(k,v)=>setD(p=>({...p,[k]:v,confirmed:k==='confirmed'?v:false}));
- const upload=async(e,k)=>{const file=e.target.files?.[0];if(!file)return;setBusy(true);try{const src=await readPhoto(file);if(k==='image'){setD(v=>({...v,image:src,originalImage:src,confirmed:false}));setAdjusted(false);setGuidance('')}else if(k==='proof')set('proof',src);else{setExtra(v=>({...v,[k]:src}));set('confirmed',false)}setError('')}catch(e){setError(e.message)}finally{setBusy(false)}};
+ const upload=async(e,k)=>{const file=e.target.files?.[0];if(!file)return;setBusy(true);try{const src=await readPhoto(file);if(k==='image'){setD(v=>({...v,image:src,originalImage:src,confirmed:false}));setAdjusted(false);setGuidance('');setPhotoTips([]);setExtra({})}else if(k==='proof')set('proof',src);else{setExtra(v=>({...v,[k]:src}));set('confirmed',false)}setError('')}catch(e){setError(e.message)}finally{setBusy(false)}};
  const prepare=async(useAI)=>{
   if(busy)return;
   if(!d.image)return setError('先拍摄或上传一张物品照片。');
   const fingerprint=d.originalImage+'\n'+note+'\n'+useAI+'\n'+mode;
   if(lastInput.current===fingerprint){setStep(2);setError('');return;}
-  setError('');setBusy(true);
+  setError('');setBusy(true);setPhotoTips([]);
   let draft=draftFromNote(note),message='已带入你的一句话，未进行图片识别。请核对名称、分类和状况。',q=[],failed=false;
   const request=new AbortController();controller.current=request;
   const timer=setTimeout(()=>request.abort(),60000);
   try{
-   if(useAI){const r=await analyzePhoto(d.originalImage,request.signal,note);draft={...draft,...r,price:draft.price};message=r.guidance;q=r.questions||[];}
+   if(useAI){const r=await analyzePhoto(d.originalImage,request.signal,note);draft={...draft,...r,price:draft.price};message=r.guidance;q=r.questions||[];if(mounted.current&&!request.signal.aborted)setPhotoTips(r.photoTips||[]);}
   }catch(e){failed=true;message=(e.name==='AbortError'?'识别超时。':e.message)+' 已保留你的文字，可以直接继续。';}
   finally{clearTimeout(timer);}
   if(mounted.current&&controller.current===request){
@@ -64,6 +65,7 @@ export function Publish({Modal,close,submit,school,items=[],initialMode='sale'})
    <div className="modal-actions"><button className="btn purple" disabled={!d.image||busy} onClick={()=>prepare(aiAvailable)}>{busy?'正在整理…':aiAvailable?'交给 AI 整理':'整理成交易卡'}<ArrowRight size={17}/></button>{aiAvailable&&<button className="text-link" disabled={busy} onClick={()=>prepare(false)}>自己填写</button>}</div>
   </>:<>
    <div className="notice compact" role="status">{guidance}</div>
+   {photoTips.length>0&&<section className="photo-guidance" aria-label="AI 补拍指导"><header><b>补拍这几处，更容易看清</b><small>AI 建议 · 可跳过</small></header>{photoTips.map(t=><div className="photo-tip" key={t.slot}><div><h3>{t.title}</h3><p>{t.reason}</p><p className="photo-angle">怎么拍：{t.angle}</p></div><label className="photo-tip-upload"><input disabled={busy} type="file" accept="image/*" aria-label={`补拍：${t.title}`} onChange={e=>upload(e,t.slot)}/>{extra[t.slot]?<img src={extra[t.slot]} alt={t.title}/>:<Camera size={25}/>}<span>{extra[t.slot]?'已添加 · 更换':'拍照 / 上传'}</span></label></div>)}<small>保留真实痕迹。补图会随交易卡保存，尚未经过 AI 复核。</small></section>}
    <div className="quick-card"><img src={d.image} alt="待发布的物品"/><label className="field">物品名称<input maxLength={40} value={d.name} onChange={e=>set('name',e.target.value)}/></label></div>
    <label className="field">物品状况 · 可以直接修改<textarea rows={3} maxLength={1500} value={d.description} onChange={e=>set('description',e.target.value)} placeholder="简单说说功能、磨损和配件；不知道的可以写未知。"/></label>
    <WritingAssistant mode="seller" name={d.name} description={d.description} onApply={text=>set('description',text)}/>
