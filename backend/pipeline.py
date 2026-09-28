@@ -116,10 +116,11 @@ def listing_draft(raw, run=ask, note=''):
         'category 只能为 数码装备/书籍文具/宿舍好物/绿植生活，不确定填空字符串。'
         'questions 是最多3个不重复的待确认字段，只能选 function/defects/accessories；已明确回答的字段不得出现，可以为空数组。'
         'photoTips 根据主图可见范围与物主描述，给0到2个具体补拍建议；清楚的部位不重复建议。'
+        '另返回cameraGuide，包含frame（从lamp/book/plant/device/furniture/generic选择最贴近主图物品的轮廓，不确定用generic）、title（拍摄目标40字内）、angle（针对该物品的构图指导120字内）。'
         '每项包含slot（side或defect）、title（拍什么，20字内）、reason（为什么需要，60字内）、angle（角度与光线，60字内）。'
         '不可把看不清说成确定缺陷，不要求掩盖瑕疵、美化或危险拆机；无法确认功能时建议安全展示，不声称照片证明功能。'
         '只返回 JSON：{"name":"物品名","description":"可见状况及注明来源的物主说法",'
-        '"category":"分类","guidance":"简短核对提醒","questions":[],"photoTips":[]}。',
+        '"category":"分类","guidance":"简短核对提醒","questions":[],"photoTips":[],"cameraGuide":{"frame":"generic","title":"拍完整物品","angle":"正面拍摄并保留边缘空间"}}。',
         [{'text': json.dumps({'ownerStatement': note[:1000], 'task': '整理交易卡草稿，未知保持未知'}, ensure_ascii=False)},
          {'image': image}])
     # One model call, followed by deterministic validation. No model-generated
@@ -133,6 +134,11 @@ def listing_draft(raw, run=ask, note=''):
         raise ValueError('待补充字段格式错误')
     result['questions'] = list(dict.fromkeys(q for q in questions
                                             if isinstance(q, str) and q in ['function', 'defects', 'accessories']))[:3]
+    guide = draft.get('cameraGuide')
+    if isinstance(guide, dict) and guide.get('frame') in ('lamp','book','plant','device','furniture','generic') and all(isinstance(guide.get(k), str) and 0 < len(guide[k]) <= n for k,n in [('title',40),('angle',120)]):
+        result['cameraGuide'] = {k: guide[k] for k in ('frame','title','angle')}
+    else:
+        result['cameraGuide'] = None
     result['photoTips'] = validate_photo_tips(draft.get('photoTips', []))
     result.update(source='Image Suggestion', ownerStatement=note[:1000], requiresConfirmation=True,
                   stage='DRAFT', pipeline=['understand_and_draft', 'validate'])

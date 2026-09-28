@@ -14,3 +14,9 @@ class PhotoTipsTests(unittest.TestCase):
         result=listing_draft(b'photo',run=lambda *a:{**draft,'photoTips':[tip]})
         self.assertEqual(result['photoTips'],[tip])
         self.assertTrue(result['requiresConfirmation'])
+
+    def test_camera_guide_only_allows_known_frames(self):
+        base={'name':'台灯','description':'底座有划痕','guidance':'请核对','questions':[]}
+        guide={'frame':'lamp','title':'拍完整台灯','angle':'灯罩和底座均进入轮廓'}
+        self.assertEqual(listing_draft(b'photo',run=lambda *a:{**base,'cameraGuide':guide})['cameraGuide'],guide)
+        self.assertIsNone(listing_draft(b'photo',run=lambda *a:{**base,'cameraGuide':{**guide,'frame':'script'}})['cameraGuide'])

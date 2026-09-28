@@ -8,7 +8,7 @@ export async function analyzePhoto(image,signal,note=''){
  if(!r.ok)throw new Error(r.status===503?'识别服务尚未配置完成，请继续手动填写。':r.status===429?'识别服务正忙，请稍后重试。':'AI 暂时不可用，请手动填写或稍后重试。');
  const d=await r.json();
  if(typeof d.name!=='string'||typeof d.description!=='string')throw new Error('AI 返回内容不完整，请手动确认。');
- return {photoTips:Array.isArray(d.photoTips)?d.photoTips.filter(t=>t&&['side','defect'].includes(t.slot)&&['title','reason','angle'].every(k=>typeof t[k]==='string'&&t[k].trim()&&t[k].length<=120)).slice(0,2):[],name:d.name.slice(0,40),description:d.description.slice(0,1500),category:['数码装备','书籍文具','宿舍好物','绿植生活'].includes(d.category)?d.category:'',questions:Array.isArray(d.questions)?[...new Set(d.questions.filter(q=>['function','defects','accessories'].includes(q)))].slice(0,3):[],guidance:'AI 草稿 · 待你确认。'+(typeof d.guidance==='string'?d.guidance.slice(0,300):'请核对真实状况、功能与配件。')};
+ return {cameraGuide:d.cameraGuide&&['lamp','book','plant','device','furniture','generic'].includes(d.cameraGuide.frame)&&['title','angle'].every(k=>typeof d.cameraGuide[k]==='string'&&d.cameraGuide[k].length<=120)?d.cameraGuide:null,photoTips:Array.isArray(d.photoTips)?d.photoTips.filter(t=>t&&['side','defect'].includes(t.slot)&&['title','reason','angle'].every(k=>typeof t[k]==='string'&&t[k].trim()&&t[k].length<=120)).slice(0,2):[],name:d.name.slice(0,40),description:d.description.slice(0,1500),category:['数码装备','书籍文具','宿舍好物','绿植生活'].includes(d.category)?d.category:'',questions:Array.isArray(d.questions)?[...new Set(d.questions.filter(q=>['function','defects','accessories'].includes(q)))].slice(0,3):[],guidance:'AI 草稿 · 待你确认。'+(typeof d.guidance==='string'?d.guidance.slice(0,300):'请核对真实状况、功能与配件。')};
 }
 export const aiAvailable=Boolean(import.meta.env.VITE_AI_ENDPOINT);
 

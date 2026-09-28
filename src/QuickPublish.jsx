@@ -1,3 +1,4 @@
+import {GuidedCamera} from './GuidedCamera';
 import {WritingAssistant} from './WritingAssistant';
 import React,{useState,useRef,useEffect} from 'react';
 import {Camera,Check,CheckCircle,ArrowLeft,ArrowRight,Sparkle,MapPin,UploadSimple} from '@phosphor-icons/react';
@@ -12,23 +13,23 @@ export function Publish({Modal,close,submit,school,items=[],initialMode='sale'})
  const [mode,setMode]=useState(initialMode),[pickupNote,setPickupNote]=useState('');
  const [step,setStep]=useState(1),[note,setNote]=useState('');
  const [d,setD]=useState({name:'',image:'',originalImage:'',description:'',category:'',condition:'见物品描述',price:initialMode==='free'?'0':'',school:schools.includes(school)?school:'',gate:'',history:'unknown',proof:'',previousPrice:'',date:'',source:'',sellerFaq:'',confirmed:false});
- const [photoTips,setPhotoTips]=useState([]);
+ const [photoTips,setPhotoTips]=useState([]),[cameraGuide,setCameraGuide]=useState(null),[camera,setCamera]=useState(null);
  const [extra,setExtra]=useState({}),[error,setError]=useState(''),[busy,setBusy]=useState(false),[adjusted,setAdjusted]=useState(false),[showOriginal,setShowOriginal]=useState(false),[guidance,setGuidance]=useState(''),[questions,setQuestions]=useState([]),[answers,setAnswers]=useState({});
  const controller=useRef(),lastInput=useRef(''),mounted=useRef(true);
  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;controller.current?.abort()}},[]);
  const set=(k,v)=>setD(p=>({...p,[k]:v,confirmed:k==='confirmed'?v:false}));
- const upload=async(e,k)=>{const file=e.target.files?.[0];if(!file)return;setBusy(true);try{const src=await readPhoto(file);if(k==='image'){setD(v=>({...v,image:src,originalImage:src,confirmed:false}));setAdjusted(false);setGuidance('');setPhotoTips([]);setExtra({})}else if(k==='proof')set('proof',src);else{setExtra(v=>({...v,[k]:src}));set('confirmed',false)}setError('')}catch(e){setError(e.message)}finally{setBusy(false)}};
+ const upload=async(e,k)=>{const file=e.target.files?.[0];if(!file)return;setBusy(true);try{const src=await readPhoto(file);if(k==='image'){setD(v=>({...v,image:src,originalImage:src,confirmed:false}));setAdjusted(false);setGuidance('');setPhotoTips([]);setCameraGuide(null);setExtra({})}else if(k==='proof')set('proof',src);else{setExtra(v=>({...v,[k]:src}));set('confirmed',false)}setError('')}catch(e){setError(e.message)}finally{setBusy(false)}};
  const prepare=async(useAI)=>{
   if(busy)return;
   if(!d.image)return setError('先拍摄或上传一张物品照片。');
   const fingerprint=d.originalImage+'\n'+note+'\n'+useAI+'\n'+mode;
   if(lastInput.current===fingerprint){setStep(2);setError('');return;}
-  setError('');setBusy(true);setPhotoTips([]);
+  setError('');setBusy(true);setPhotoTips([]);setCameraGuide(null);
   let draft=draftFromNote(note),message='已带入你的一句话，未进行图片识别。请核对名称、分类和状况。',q=[],failed=false;
   const request=new AbortController();controller.current=request;
   const timer=setTimeout(()=>request.abort(),60000);
   try{
-   if(useAI){const r=await analyzePhoto(d.originalImage,request.signal,note);draft={...draft,...r,price:draft.price};message=r.guidance;q=r.questions||[];if(mounted.current&&!request.signal.aborted)setPhotoTips(r.photoTips||[]);}
+   if(useAI){const r=await analyzePhoto(d.originalImage,request.signal,note);draft={...draft,...r,price:draft.price};message=r.guidance;q=r.questions||[];if(mounted.current&&!request.signal.aborted){setPhotoTips(r.photoTips||[]);setCameraGuide(r.cameraGuide||null);}}
   }catch(e){failed=true;message=(e.name==='AbortError'?'识别超时。':e.message)+' 已保留你的文字，可以直接继续。';}
   finally{clearTimeout(timer);}
   if(mounted.current&&controller.current===request){
@@ -47,6 +48,7 @@ export function Publish({Modal,close,submit,school,items=[],initialMode='sale'})
   try{await submit({...d,description:finalDescription,ownerNote:note,photos:extra,imageAdjusted:adjusted,pickup:meetingLabel(d.school,d.gate),id:`ITEM-${Date.now().toString(36).toUpperCase()}`,price:Number(d.price),owner:'我',platform:[],uploaded:d.history==='upload'?[{price:d.previousPrice===''?null:Number(d.previousPrice),date:d.date||'时间未知',source:d.source,proof:d.proof}]:[],status:'REVIEW',version:1,time:0});}
   catch(e){setError(e.message||'提交失败，请稍后重试。');setBusy(false)}
  };
+ if(camera)return <Modal title="辅助拍照" close={()=>setCamera(null)}><GuidedCamera guide={camera} onClose={()=>setCamera(null)} onSave={src=>{if(camera.slot==='image'){setD(v=>({...v,image:src,originalImage:src,confirmed:false}));setAdjusted(false);lastInput.current='';setGuidance('主图已更换，请核对原有 AI 描述是否仍与照片一致。');}else{setExtra(v=>({...v,[camera.slot]:src}));set('confirmed',false)}setCamera(null)}}/></Modal>;
  return <Modal title={mode==='free'?'送一件好物，接一段故事':'拍张照，让好物接力'} close={close} back={step===2?()=>{setStep(1);set('confirmed',false)}:close}>
   <div className="steps quick-steps">{['照片＋一句话','核对并提交'].map((s,i)=><span key={s} className={step===i+1?'active':step>i+1?'done':''} aria-current={step===i+1?'step':undefined}><b>{step>i+1?<Check size={14}/>:i+1}</b>{s}</span>)}</div>
   {step===1?<>
@@ -65,7 +67,8 @@ export function Publish({Modal,close,submit,school,items=[],initialMode='sale'})
    <div className="modal-actions"><button className="btn purple" disabled={!d.image||busy} onClick={()=>prepare(aiAvailable)}>{busy?'正在整理…':aiAvailable?'交给 AI 整理':'整理成交易卡'}<ArrowRight size={17}/></button>{aiAvailable&&<button className="text-link" disabled={busy} onClick={()=>prepare(false)}>自己填写</button>}</div>
   </>:<>
    <div className="notice compact" role="status">{guidance}</div>
-   {photoTips.length>0&&<section className="photo-guidance" aria-label="AI 补拍指导"><header><b>补拍这几处，更容易看清</b><small>AI 建议 · 可跳过</small></header>{photoTips.map(t=><div className="photo-tip" key={t.slot}><div><h3>{t.title}</h3><p>{t.reason}</p><p className="photo-angle">怎么拍：{t.angle}</p></div><label className="photo-tip-upload"><input disabled={busy} type="file" accept="image/*" aria-label={`补拍：${t.title}`} onChange={e=>upload(e,t.slot)}/>{extra[t.slot]?<img src={extra[t.slot]} alt={t.title}/>:<Camera size={25}/>}<span>{extra[t.slot]?'已添加 · 更换':'拍照 / 上传'}</span></label></div>)}<small>保留真实痕迹。补图会随交易卡保存，尚未经过 AI 复核。</small></section>}
+   {cameraGuide&&<div className="notice compact"><b>AI 拍摄构图 · {cameraGuide.title}</b><p>{cameraGuide.angle}</p><button type="button" className="outline-button" onClick={()=>setCamera({...cameraGuide,slot:'image'})}>打开相机，按轮廓重拍主图</button></div>}
+   {photoTips.length>0&&<section className="photo-guidance" aria-label="AI 补拍指导"><header><b>补拍这几处，更容易看清</b><small>AI 建议 · 可跳过</small></header>{photoTips.map(t=><div className="photo-tip" key={t.slot}><div><h3>{t.title}</h3><p>{t.reason}</p><p className="photo-angle">怎么拍：{t.angle}</p><button type="button" className="outline-button" onClick={()=>setCamera({...t,frame:t.slot==='defect'?'detail':cameraGuide?.frame||'generic'})}>线框辅助拍摄</button></div><label className="photo-tip-upload"><input disabled={busy} type="file" accept="image/*" aria-label={`补拍：${t.title}`} onChange={e=>upload(e,t.slot)}/>{extra[t.slot]?<img src={extra[t.slot]} alt={t.title}/>:<Camera size={25}/>}<span>{extra[t.slot]?'已添加 · 更换':'拍照 / 上传'}</span></label></div>)}<small>保留真实痕迹。补图会随交易卡保存，尚未经过 AI 复核。</small></section>}
    <div className="quick-card"><img src={d.image} alt="待发布的物品"/><label className="field">物品名称<input maxLength={40} value={d.name} onChange={e=>set('name',e.target.value)}/></label></div>
    <label className="field">物品状况 · 可以直接修改<textarea rows={3} maxLength={1500} value={d.description} onChange={e=>set('description',e.target.value)} placeholder="简单说说功能、磨损和配件；不知道的可以写未知。"/></label>
    <WritingAssistant mode="seller" name={d.name} description={d.description} onApply={text=>set('description',text)}/>
