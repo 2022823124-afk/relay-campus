@@ -25,6 +25,6 @@ export function WritingAssistant({mode,name,description,onApply,focusContext=''}
  {result&&<div className="writing-result" aria-live="polite">{result.questions.length>0&&<><b>{seller?'这些还需要你确认':'建议向物主确认'}</b><ul>{result.questions.map(q=><li key={q}>{q}</li>)}</ul></>}
  <label className="field">{seller?'新版描述 · 可编辑':'询问消息 · 可编辑'}<textarea rows={4} maxLength={1500} value={text} onChange={e=>setText(e.target.value)}/></label>
  <button type="button" className="btn purple" disabled={!text.trim()} onClick={()=>{onApply(text.trim());setResult(null)}}>{seller?'核对后采用描述':'带入聊天，自己确认发送'}</button>
- {!seller&&<p className="fine-print">当前聊天为演示，消息不会发送给真实卖家。</p>}</div>}
+ </div>}
  </details>;
 }

@@ -7,7 +7,7 @@ export function FocusChoices({item,value,onChange}){
 }
 function FocusMessage({message,onAsk}){
  const [draft,setDraft]=useState(message);
- return <details className="focus-message"><summary>查看并编辑询问消息</summary><label className="field">询问消息<textarea rows={4} maxLength={1500} value={draft} onChange={e=>setDraft(e.target.value)}/></label><button type="button" className="btn purple" disabled={!draft.trim()} onClick={()=>onAsk(draft.trim())}>带入聊天，确认后发送</button><small>当前为聊天演示，不会发送给真实卖家。</small></details>;
+ return <details className="focus-message"><summary>查看并编辑询问消息</summary><label className="field">询问消息<textarea rows={4} maxLength={1500} value={draft} onChange={e=>setDraft(e.target.value)}/></label><button type="button" className="btn purple" disabled={!draft.trim()} onClick={()=>onAsk(draft.trim())}>带入聊天，确认后发送</button></details>;
 }
 export function ProductFocus({item,focus,onFocus,onAsk}){
  const summary=buildFocus(item,focus);
