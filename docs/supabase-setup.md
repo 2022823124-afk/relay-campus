@@ -8,6 +8,7 @@
 2. 打开 **SQL Editor**。
 3. 复制并运行 `supabase/migrations/001_relay_storage.sql`。
 4. 再运行 `supabase/migrations/002_accounts.sql`，创建私有账号同步表。
+5. 运行 `supabase/migrations/003_private_backend_access.sql`，显式授予后端访问权，同时保留浏览器角色无直接读写权限。
 
 脚本会创建：
 
@@ -44,6 +45,8 @@
 ## 邮箱账号与跨设备同步
 
 在 Supabase 的 Authentication → Providers 中开启 Email，保留邮箱确认。Authentication → URL Configuration 的 Site URL 设置为 `https://2022823124-afk.github.io/relay-campus/`；注册验证后回到网站，使用邮箱与密码登录。正式开放前配置自己管理的 SMTP，并按 Supabase 文档设置邮件发送限制。
+
+注意：Supabase 默认邮件服务只向项目组织成员的邮箱发信。要让其他同学注册，必须在 Authentication → Emails 配置自定义 SMTP；不能仅以“注册接口返回成功”作为邮件送达的验收依据。保留邮箱确认，不通过关闭确认来绕过邮件配置。见[官方 SMTP 说明](https://supabase.com/docs/guides/auth/auth-smtp)。
 
 Render 使用已有 Supabase 后端密钥代理普通 `/auth/v1/signup`、密码登录与令牌刷新，不使用管理员创建用户或跳过邮箱确认。用户密码不写入网站的本地存储或数据库。浏览器只保存自己的会话令牌，后端每次加载、保存账号数据都先向 Supabase 验证用户，忽略浏览器提供的用户编号。
 
