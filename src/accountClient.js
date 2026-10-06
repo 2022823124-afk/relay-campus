@@ -1,5 +1,5 @@
 import {getSession,sessionKey} from './accountStorage';
-const endpoint=()=>import.meta.env.VITE_AI_ENDPOINT?.replace(/\/$/,'');
+const endpoint=()=>(import.meta.env.VITE_ACCOUNT_ENDPOINT||import.meta.env.VITE_AI_ENDPOINT)?.replace(/\/$/,'');
 let refreshing;
 const ownerId=getSession()?.user.id;
 export function storeSession(data){if(!data.accessToken||!data.refreshToken||!data.user?.id)throw Error('登录结果不完整，请重试。');localStorage.setItem(sessionKey,JSON.stringify({...data,expiresAt:Date.now()+(data.expiresIn||3600)*1000}));}
