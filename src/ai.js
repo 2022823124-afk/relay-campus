@@ -1,3 +1,4 @@
+import {validateOrderResult} from './orderImport';
 // Optional trusted backend. Never ship model credentials in a browser bundle.
 export function aiHeaders(){return {'Content-Type':'application/json'};}
 export async function analyzePhoto(image,signal,note=''){
@@ -30,4 +31,12 @@ export async function askPlatform(messages,signal){
  const data=await response.json();
  if(typeof data.answer!=='string'||!data.answer.trim()||data.source!=='model')throw new Error('AI 回复不完整，请重试。');
  return data.answer;
+}
+
+export async function analyzeOrderScreenshot(image,signal){
+ const endpoint=import.meta.env.VITE_AI_ENDPOINT;
+ if(!endpoint)throw new Error('订单识别服务尚未连接，请先手动填写。');
+ const r=await fetch(`${endpoint.replace(/\/$/,'')}/order-screenshot`,{method:'POST',headers:aiHeaders(),body:JSON.stringify({image}),signal});
+ if(!r.ok)throw new Error(r.status===404?'订单识别接口尚未部署，请稍后重试或手动填写。':r.status===503?'图片识别服务尚未配置完成，请手动填写。':r.status===429?'识别服务正忙，请稍后重试。':r.status===401?'服务暂未开放，请联系维护者。':'未能识别这张截图，请换一张清楚的订单截图。');
+ return validateOrderResult(await r.json());
 }

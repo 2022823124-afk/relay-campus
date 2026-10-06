@@ -1,0 +1,40 @@
+/* Phosphor: regular utility icons, duotone category icons, filled active navigation. */
+@media (max-width:600px) {
+  .mobile-category-grid button>span {
+    width:48px;height:48px;border-radius:17px;
+    background:#f0edf5;color:#79618f;
+    box-shadow:inset 0 0 0 1px #79618f0a;
+    transition:background .18s ease,box-shadow .18s ease;
+  }
+  .mobile-category-grid button:nth-child(2)>span {background:#ecebf6;color:#74638f}
+  .mobile-category-grid button:nth-child(3)>span {background:#f4eedf;color:#977944}
+  .mobile-category-grid button:nth-child(4)>span {background:#f2e9e5;color:#9b7468}
+  .mobile-category-grid button:nth-child(5)>span {background:#eaf0de;color:#70864f}
+  .mobile-category-grid button[aria-pressed=true]>span {
+    background:#e9ddf5;color:#7950ac;box-shadow:inset 0 0 0 1.5px #ad8dc9;
+  }
+  .mobile-category-grid svg {display:block;width:27px;height:27px;flex:none}
+  .mobile-nav>button>svg {
+    width:24px;height:24px;box-sizing:content-box;
+    padding:4px 12px;margin:0;border-radius:12px;
+  }
+  .mobile-nav>button[aria-current=page]>svg {
+    padding:4px 12px;margin:0;border-radius:12px;background:#eee4f6;
+  }
+  .mobile-nav>button {gap:2px;color:#777b70}
+  .mobile-nav>button[aria-current=page] {color:#7950ac;font-weight:700}
+  .mobile-nav .create-icon {width:48px;height:40px;border-radius:15px;background:#d4eaa8;color:#52683c}
+  .mobile-tool {border-radius:14px}
+  .mobile-tool:hover {background:#eee7f4}
+  .favorite-button {background:#fffdf8ed;color:#77736c;box-shadow:0 1px 5px #31283d12}
+  .favorite-button.is-favorite {background:#eee4f6;color:#7950ac}
+  .mobile-category-grid button:focus-visible,.mobile-nav button:focus-visible,.mobile-tool:focus-visible {
+    outline:2px solid #7950ac;outline-offset:3px;border-radius:16px;
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  .mobile-category-grid button>span {transition:none}
+}
+
+.mobile-free-feature>svg,.mobile-free-panel>svg{color:#758d50;flex:none;stroke-linejoin:round}
+.mobile-nav>button[aria-current=page]>svg{color:#7950ac}

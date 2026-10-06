@@ -79,6 +79,12 @@ def _delete_upload(path):
 
 def save_listing(data):
     """Save a human-confirmed draft and its images. Returns stable DB identifiers."""
+    month = data.get('date') or ''
+    if month:
+        from order_screenshot import purchase_month
+        if purchase_month(month) != month:
+            raise ValueError('历史月份不正确')
+    # Preserve month precision in the source label without inventing a day.
     client_id = data['id']
     database_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f'relay-campus:{client_id}'))
     image_sources = [('primary', data.get('image'))]
@@ -129,7 +135,7 @@ def save_listing(data):
                 'condition': row['condition'],
                 'price': previous,
                 'source_type': 'uploaded_record',
-                'source_label': (data.get('source') or '用户上传凭证')[:100],
+                'source_label': ((data.get('source') or '用户上传凭证')[:80] + (f' · {month}（月份）' if month else ''))[:100],
                 'confirmed': True,
             }, prefer='return=minimal')
         return {'saved': True, 'databaseId': database_id, 'clientItemId': client_id,

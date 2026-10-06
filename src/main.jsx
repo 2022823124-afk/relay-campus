@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { App } from "./App.jsx";
 import "./styles.css";
 import "./phone-demo.css";
+import "./icon-system.css";
 
 // A real narrow viewport keeps every existing mobile breakpoint, fixed toolbar
 // and modal identical to the phone experience. The embedded page never nests.

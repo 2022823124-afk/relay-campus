@@ -75,6 +75,12 @@ def draft(payload: ImageRequest):
     return execute(payload, lambda raw: listing_draft(raw, note=payload.note))
 
 
+@app.post('/order-screenshot')
+def order_import(payload: ImageRequest):
+    from order_screenshot import order_screenshot
+    return execute(payload, order_screenshot)
+
+
 @app.post('/history-ocr')
 def history(payload: ImageRequest):
     return execute(payload, extract_receipt)
@@ -119,6 +125,7 @@ class ListingRequest(BaseModel):
     history: str = Field(default='unknown', pattern='^(unknown|statement|upload)$')
     previousPrice: float | None = Field(default=None, ge=0, le=1000000)
     source: str = Field(default='', max_length=100)
+    date: str = Field(default='', pattern=r'^(?:[0-9]{4}-(?:0[1-9]|1[0-2]))?$')
     version: int = Field(default=1, ge=1)
 
 

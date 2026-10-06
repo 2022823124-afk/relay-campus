@@ -3,7 +3,7 @@ import {BrandWelcome,brandMark} from './BrandWelcome';
 import {ProductFocus} from './ProductFocus';
 import {useWatchlist} from './useWatchlist';
 import React,{useState,useEffect,useRef} from 'react';
-import {House,UserCircle,Recycle,ArrowUpRight,ArrowRight,ArrowLeft,Plus,MagnifyingGlass,Heart,MapPin,CaretDown,ChatCircleDots,X,Check,CheckCircle,Camera,UploadSimple,ShieldCheck,IdentificationCard,LinkSimple,FileText,BookOpen,Armchair,Plant,SquaresFour,SlidersHorizontal,PaperPlaneTilt,WarningCircle,Sparkle} from '@phosphor-icons/react';
+import {House,UserCircle,Recycle,ArrowUpRight,ArrowRight,ArrowLeft,Plus,MagnifyingGlass,Heart,MapPin,CaretDown,ChatCircleDots,X,Check,CheckCircle,Devices,UploadSimple,ShieldCheck,IdentificationCard,LinkSimple,FileText,BookOpen,Armchair,Plant,SquaresFour,SlidersHorizontal,PaperPlaneTilt,WarningCircle,Sparkle} from '@phosphor-icons/react';
 import './market.css';
 import './mobile.css';
 import './island.css';
@@ -28,7 +28,7 @@ const seed=[
 {id:'ITEM-0005',name:'读过还想分享的英文诗集',category:'书籍文具',price:45,img:'books',condition:'少量笔记',owner:'墨墨',pickup:'图书馆 · 南门',description:'一本读过很喜欢的英文诗集，有少量铅笔标记，封面和内页完整。想把读到的温柔，也传给下一位同学。',platform:[],uploaded:[],time:52},
 {id:'ITEM-0006',name:'让通勤安静一点的头戴耳机',category:'数码装备',price:120,img:'headphones',condition:'八成新',owner:'七七',pickup:'教学区 · 咖啡店',description:'功能正常，耳垫有使用痕迹，充电线齐全。支持见面试听。',platform:[{price:180,date:'2026.01'}],uploaded:[],time:64}];
 const islandSeed=refreshDemoPhotos(seed).map((i,n)=>({...i,school:schools[n],gate:n%2?'teaching':'living',pickup:meetingLabel(schools[n],n%2?'teaching':'living'),confirmed:true}));
-const cats=[['全部好物',SquaresFour],['数码装备',Camera],['书籍文具',BookOpen],['宿舍好物',Armchair],['绿植生活',Plant],['免费接力',Recycle]];
+const cats=[['全部好物',SquaresFour],['数码装备',Devices],['书籍文具',BookOpen],['宿舍好物',Armchair],['绿植生活',Plant],['免费接力',Recycle]];
 const sources={'Platform Record':'本平台已经完成并由双方确认的交易记录。','Uploaded Record':'来自用户上传的历史凭证，经物主确认。不能计入平台转手次数。','Owner Statement':'物主主动陈述并确认，但没有可核验凭证的信息。','Unknown':'没有已有记录或可确认资料，不能据此判断从未交易过。'};
 const asset=name=>`${import.meta.env.BASE_URL}assets/${name}`;
 const read=(k,f)=>{try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}};const persist=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};const image=i=>i.image||asset(i.img==='plant'?'plant-new.png':`${i.img}.jpg`);const price=n=>Number(n)===0?'免费':`¥${n}`;
