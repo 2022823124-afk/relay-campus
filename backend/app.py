@@ -14,13 +14,15 @@ from database import (DatabaseNotConfigured, configured as database_configured,
 app = FastAPI(title='Relay Campus Agent', docs_url='/docs')
 app.add_middleware(CORSMiddleware,
     allow_origins=os.getenv('RELAY_ALLOWED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173').split(','),
-    allow_methods=['POST', 'GET'], allow_headers=['Content-Type', 'X-Relay-Access'])
+    allow_methods=['POST', 'GET'], allow_headers=['Content-Type', 'X-Relay-Access', 'Authorization'])
+from accounts import router as account_router
+app.include_router(account_router)
 slot = threading.BoundedSemaphore(1)
 
 
 @app.middleware('http')
 async def protect_model_requests(request: Request, call_next):
-    if request.method == 'POST':
+    if request.method == 'POST' and not request.url.path.startswith('/account/'):
         code = os.getenv('RELAY_ACCESS_CODE', '')
         if os.getenv('RELAY_REQUIRE_ACCESS') == '1' and not code:
             response = JSONResponse({'detail': '服务访问码尚未配置'}, status_code=503)
